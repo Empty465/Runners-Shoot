@@ -306,6 +306,24 @@
 - 검증: `dotnet build Assembly-CSharp.csproj` 성공. MCP에서 일반 피해 후 `Stagger=True, Stun=False`, 임계값 피해 후 `Stagger=False, Stun=True`, 상태 텍스트 `STUN`, Console Error 0건을 확인했다.
 - 제한: Stun 상태에서의 Execution과 적 등급별 Stagger 횟수 규칙은 아직 구현하지 않았다.
 
+## 2026-09-18 - Execution
+
+- 내용: E 입력으로 가까운 Stun 상태의 저체력 적을 처형하는 기능을 추가했다.
+- 조건:
+  - 실행 범위 내 적
+  - EnemyStun 활성 상태
+  - Enemy HP가 최대 HP의 30% 이하
+- 보상:
+  - PlayerHealth 회복
+  - PlayerWeapon 탄약 회복
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerExecution.cs`
+  - `Assets/Scripts/Player/PlayerExecution.cs.meta`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. MCP에서 적 HP 1/Stun 상태를 E 실행 경로로 처형해 `HP=0`, `Dead=True`, 탄약 `29->30`, Console Error 0건을 확인했다.
+- 제한: 처형 애니메이션, 처형 전용 근접 공격 판정, 보상 연출은 아직 구현하지 않았다.
+
 ## 2026-09-18 - Player 기본 총기
 
 - 내용: 기존 `Player/Attack` 좌클릭 입력을 사용해 마우스 방향으로 기본 투사체를 발사하는 기능을 추가했다.

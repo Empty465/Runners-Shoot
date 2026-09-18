@@ -712,6 +712,25 @@ MonoBehaviour:
   projectileColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   maxAmmo: 30
   startingAmmo: 30
+--- !u!114 &893030605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 893030591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e562896f6d366248a884afb4c213e00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerExecution
+  executionRange: 2
+  healthThresholdRatio: 0.3
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  healthReward: 2
+  ammoReward: 5
 --- !u!4 &915831437 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4889544791663451394, guid: 79737706242d4f94db0584d974eb3910, type: 3}
@@ -1683,6 +1702,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1735070794060949732, guid: f0c491b711112cb4991c33efa4db9396, type: 3}
       insertIndex: -1
       addedObject: {fileID: 893030604}
+    - targetCorrespondingSourceObject: {fileID: 1735070794060949732, guid: f0c491b711112cb4991c33efa4db9396, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 893030605}
   m_SourcePrefab: {fileID: 100100000, guid: f0c491b711112cb4991c33efa4db9396, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
