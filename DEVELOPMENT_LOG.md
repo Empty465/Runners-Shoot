@@ -138,3 +138,41 @@
 ## 현재 세션 없이 이어가기 위한 시작점
 
 현재 구현의 다음 작업은 `Player Parry + Enemy Stun`이다. 먼저 `EnemyAttack.cs`, `BasicEnemy.prefab`, Player Prefab과 기존 Input Actions를 확인한 뒤 구현을 시작한다. 목표 범위는 Parry 성공, 현재 공격 취소, Enemy Stun, Stun 종료 후 공격 재개까지이며 HP, Damage, Death, Execution은 포함하지 않는다.
+
+## 2026-09-18 - Player HP + Enemy Damage
+
+- 내용: Player에 독립적인 HP 컴포넌트를 추가하고 BasicEnemy의 AttackHitbox가 Player에게 피해를 주도록 연결했다.
+- 기능:
+  - Player HP 최대치 5 및 현재 HP 초기화
+  - EnemyAttack의 attackDamage를 PlayerHealth에 전달
+  - HP 0 도달 시 사망 상태 및 로그 처리
+  - 패링 중에는 EnemyAttack의 피해 적용 방지
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerHealth.cs`
+  - `Assets/Scripts/Player/PlayerHealth.cs.meta`
+  - `Assets/Scripts/Combat/EnemyAttack.cs`
+  - `Assets/Prefabs/Player/Player.prefab`
+  - `DEVELOPMENT_LOG.md`
+- 검증: PlayerHealth C# 진단 오류 없음. Unity Editor Play Mode에서 AttackHitbox의 HP 감소와 패링 중 피해 방지는 추가 확인이 필요하다.
+- 제한: 이번 작업에서는 Armor, Death 연출/입력 잠금, HUD를 구현하지 않았다.
+- 다음 작업: Unity Console 오류를 확인한 뒤 Player HP 피해 동작을 Play Mode에서 검증한다.
+
+## 2026-09-18 - 임시 Player HP 표시
+
+- 내용: TestArena에서 Player HP를 확인할 수 있도록 화면 좌측 상단에 임시 텍스트를 추가했다.
+- 변경 파일:
+  - `Assets/Scripts/UI/PlayerHealthDebugDisplay.cs`
+  - `Assets/Scripts/UI/PlayerHealthDebugDisplay.cs.meta`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: UI 스크립트 C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj` 성공. Play Mode에서 화면 표시 위치와 HP 감소에 따른 텍스트 갱신은 Editor 확인이 필요하다.
+- 제한: 정식 Canvas/HUD, HP 게이지, Armor 표시는 아직 구현하지 않았다.
+
+## 2026-09-18 - 임시 HP HUD MCP 검증 및 수정
+
+- 문제: 수동으로 추가한 Unity YAML FileID가 signed 64-bit 범위를 초과했고, `GUI.skin`을 `Awake`에서 호출해 HUD가 표시되지 않았다.
+- 수정:
+  - Player Prefab과 TestArena UI의 FileID를 유효한 값으로 교체
+  - PlayerHealth와 PlayerHealthDebugDisplay를 Unity MCP로 Scene 오브젝트에 직접 연결하고 Scene 저장
+  - GUI 스타일 생성을 `OnGUI` 내부로 이동
+- 검증: Unity MCP로 TestArena Play Mode 실행, Console Error 0건, Game 화면에서 `HP: 5/5` 표시 확인.

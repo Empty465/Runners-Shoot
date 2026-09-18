@@ -178,6 +178,18 @@ public class EnemyAttack : MonoBehaviour
             return;
         }
 
+        PlayerParry playerParry = other.GetComponentInParent<PlayerParry>();
+        if (playerParry != null && playerParry.IsParryActive)
+        {
+            return;
+        }
+
+        PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(attackDamage);
+        }
+
         AttackHit?.Invoke(other);
     }
 
