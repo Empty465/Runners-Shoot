@@ -36,8 +36,9 @@ public class PlayerHealthDebugDisplay : MonoBehaviour
         }
 
         GUI.Label(
-            new Rect(screenOffset.x, screenOffset.y, 220f, 40f),
-            $"HP: {playerHealth.CurrentHealth:0}/{playerHealth.MaxHealth:0}",
+            new Rect(screenOffset.x, screenOffset.y, 220f, 70f),
+            $"HP: {playerHealth.CurrentHealth:0}/{playerHealth.MaxHealth:0}\n" +
+            $"ARMOR: {playerHealth.CurrentArmor:0}/{playerHealth.MaxArmor:0}",
             labelStyle);
     }
 }

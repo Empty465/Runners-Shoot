@@ -176,3 +176,47 @@
   - PlayerHealth와 PlayerHealthDebugDisplay를 Unity MCP로 Scene 오브젝트에 직접 연결하고 Scene 저장
   - GUI 스타일 생성을 `OnGUI` 내부로 이동
 - 검증: Unity MCP로 TestArena Play Mode 실행, Console Error 0건, Game 화면에서 `HP: 5/5` 표시 확인.
+
+## 2026-09-18 - Player Armor
+
+- 내용: Player 피해 처리에 Armor를 추가했다. Armor가 남아 있으면 HP 대신 Armor가 피해량만큼 감소한다.
+- 기능:
+  - 최대 Armor 및 시작 Armor 설정
+  - Armor 우선 피해 처리
+  - Armor 회복 API와 `ArmorChanged` 이벤트 추가
+  - 임시 HUD에 HP와 Armor 동시 표시
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerHealth.cs`
+  - `Assets/Scripts/UI/PlayerHealthDebugDisplay.cs`
+  - `Assets/Prefabs/Player/Player.prefab`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP 런타임 평가에서 첫 피해 후 `HP 5->5, Armor 5->4`, Armor 소진 후 다음 피해에서 `HP 5->4`를 확인했다.
+- 제한: 기존 임시 HUD는 현재 Game 화면 캡처에서 HP만 표시되어 Armor 텍스트 반영은 추가 확인이 필요하다.
+- 제한: Armor 아이템, 정식 HUD, Armor 파괴 연출은 아직 구현하지 않았다.
+
+## 2026-09-18 - HP/Armor 임시 HUD 갱신 수정
+
+- 문제: 기존 IMGUI 임시 표시가 HP와 Armor 상태 변경을 화면에 안정적으로 반영하지 않았다.
+- 수정:
+  - `PlayerStatusDebugCanvas`를 추가해 런타임 Canvas/Text로 상태를 표시
+  - `HealthChanged`와 `ArmorChanged` 이벤트를 구독해 피해 즉시 텍스트 갱신
+  - HP와 Armor를 한 줄의 테스트 표시로 통합
+- 변경 파일:
+  - `Assets/Scripts/UI/PlayerStatusDebugCanvas.cs`
+  - `Assets/Scripts/UI/PlayerStatusDebugCanvas.cs.meta`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: Unity MCP 런타임에서 피해 적용 후 실제 Text 값이 `HP: 5/5 | ARMOR: 4/5`로 갱신되는 것을 확인했고 Console Error는 0건이다.
+- 제한: 현재 HUD는 테스트용이며 정식 HP/Armor 게이지는 아직 구현하지 않았다.
+
+## 2026-09-18 - 임시 HUD 중복 표시 제거
+
+- 문제: 기존 IMGUI HP/Armor 표시와 Canvas 기반 HUD가 동시에 활성화되어 텍스트가 겹쳤다.
+- 수정: TestArena `/UI` 오브젝트에서 `PlayerHealthDebugDisplay`와 `PlayerArmorDebugDisplay`를 제거하고 `PlayerStatusDebugCanvas`만 유지했다.
+- 검증: Unity MCP Game 화면에서 `HP: 5/5 | ARMOR: 0/5` 한 줄만 표시되고 Console Error 0건을 확인했다.
+
+## 2026-09-18 - HUD 초기값 및 갱신 재수정
+
+- 문제: HUD Text 생성 직후 초기 문자열을 설정하지 않아 첫 프레임에 이전 HP/Armor 값이 보일 수 있었다.
+- 수정: Canvas 생성 직후 `UpdateStatusText()`를 호출해 현재 PlayerHealth 값을 즉시 반영했다.
+- 검증: Unity MCP에서 초기 Text `HP: 5/5 | ARMOR: 5/5`, 피해 적용 후 `HP: 5/5 | ARMOR: 4/5`를 확인했다. Console Error 0건.

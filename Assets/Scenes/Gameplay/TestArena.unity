@@ -606,7 +606,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 431689452}
-  - component: {fileID: 431689453}
+  - component: {fileID: 431689455}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -629,7 +629,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &431689453
+--- !u!114 &431689455
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -638,9 +638,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 431689451}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 161b61249a0d9aa45b71346e744474ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 2a3810eec42243d4cae56256c7805123, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthDebugDisplay
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatusDebugCanvas
   screenOffset: {x: 20, y: 20}
   fontSize: 24
   textColor: {r: 1, g: 1, b: 1, a: 1}
@@ -684,6 +684,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 5
+  maxArmor: 5
+  startingArmor: 0
 --- !u!4 &915831437 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4889544791663451394, guid: 79737706242d4f94db0584d974eb3910, type: 3}
