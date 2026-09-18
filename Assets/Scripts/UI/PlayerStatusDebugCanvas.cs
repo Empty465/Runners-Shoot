@@ -8,13 +8,16 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     [SerializeField] private Color textColor = Color.white;
 
     private PlayerHealth playerHealth;
+    private PlayerWeapon playerWeapon;
     private Text statusText;
 
     private void Awake()
     {
         playerHealth = FindAnyObjectByType<PlayerHealth>();
+        playerWeapon = FindAnyObjectByType<PlayerWeapon>();
         CreateStatusText();
         SubscribeToHealthChanges();
+        SubscribeToAmmoChanges();
         UpdateStatusText();
     }
 
@@ -24,6 +27,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             playerHealth = FindAnyObjectByType<PlayerHealth>();
             SubscribeToHealthChanges();
+        }
+
+        if (playerWeapon == null)
+        {
+            playerWeapon = FindAnyObjectByType<PlayerWeapon>();
+            SubscribeToAmmoChanges();
         }
 
         if (playerHealth != null)
@@ -38,6 +47,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             playerHealth = FindAnyObjectByType<PlayerHealth>();
             SubscribeToHealthChanges();
+        }
+
+        if (playerWeapon == null)
+        {
+            playerWeapon = FindAnyObjectByType<PlayerWeapon>();
+            SubscribeToAmmoChanges();
         }
 
         UpdateStatusText();
@@ -64,6 +79,19 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         UpdateStatusText();
     }
 
+    private void SubscribeToAmmoChanges()
+    {
+        if (playerWeapon != null)
+        {
+            playerWeapon.AmmoChanged += OnAmmoChanged;
+        }
+    }
+
+    private void OnAmmoChanged(int currentAmmo)
+    {
+        UpdateStatusText();
+    }
+
     private void UpdateStatusText()
     {
         if (statusText == null || playerHealth == null)
@@ -73,6 +101,11 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
         statusText.text = $"HP: {playerHealth.CurrentHealth:0}/{playerHealth.MaxHealth:0} | " +
             $"ARMOR: {playerHealth.CurrentArmor:0}/{playerHealth.MaxArmor:0}";
+
+        if (playerWeapon != null)
+        {
+            statusText.text += $" | AMMO: {playerWeapon.CurrentAmmo}/{playerWeapon.MaxAmmo}";
+        }
     }
 
     private void OnDisable()
@@ -84,6 +117,11 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
         playerHealth.HealthChanged -= OnHealthChanged;
         playerHealth.ArmorChanged -= OnArmorChanged;
+
+        if (playerWeapon != null)
+        {
+            playerWeapon.AmmoChanged -= OnAmmoChanged;
+        }
     }
 
     private void CreateStatusText()
@@ -113,6 +151,6 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         textTransform.anchorMax = new Vector2(0f, 1f);
         textTransform.pivot = new Vector2(0f, 1f);
         textTransform.anchoredPosition = new Vector2(screenOffset.x, -screenOffset.y);
-        textTransform.sizeDelta = new Vector2(260f, 80f);
+        textTransform.sizeDelta = new Vector2(420f, 80f);
     }
 }

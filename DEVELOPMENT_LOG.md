@@ -220,3 +220,107 @@
 - 문제: HUD Text 생성 직후 초기 문자열을 설정하지 않아 첫 프레임에 이전 HP/Armor 값이 보일 수 있었다.
 - 수정: Canvas 생성 직후 `UpdateStatusText()`를 호출해 현재 PlayerHealth 값을 즉시 반영했다.
 - 검증: Unity MCP에서 초기 Text `HP: 5/5 | ARMOR: 5/5`, 피해 적용 후 `HP: 5/5 | ARMOR: 4/5`를 확인했다. Console Error 0건.
+
+## 2026-09-18 - 기본 총기 탄약
+
+- 내용: 기본 총기에 탄약 수량과 발사 시 소모 처리를 추가했다.
+- 기능:
+  - 최대 탄약/시작 탄약 Inspector 설정
+  - 발사 성공 시 탄약 1개 소모
+  - 탄약이 0이면 발사하지 않고 로그 출력
+  - 탄약 회복 API와 `AmmoChanged` 이벤트 추가
+  - 테스트 HUD에 탄약 수치 표시
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerWeapon.cs`
+  - `Assets/Scripts/UI/PlayerStatusDebugCanvas.cs`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP에서 `Ammo 30->29`, 투사체 생성, HUD `AMMO: 29/30`, Console Error 0건을 확인했다.
+- 제한: 재장전, 무기별 탄약, 탄약 아이템은 아직 구현하지 않았다.
+
+## 2026-09-18 - Enemy HP 및 총알 피해
+
+- 내용: BasicEnemy에 EnemyHealth를 추가하고 PlayerProjectile이 적중 시 적 HP를 감소시키도록 연결했다.
+- 기능:
+  - Enemy HP 최대치 5 및 피해 처리
+  - 투사체 피해량 Inspector 설정
+  - 투사체 적중 시 EnemyHealth 피해 적용
+  - Player와 Enemy가 같은 `Actors` 부모를 공유하는 구조에 맞춘 소유자 충돌 판정
+- 변경 파일:
+  - `Assets/Scripts/Enemies/EnemyHealth.cs`
+  - `Assets/Scripts/Enemies/EnemyHealth.cs.meta`
+  - `Assets/Scripts/Combat/PlayerProjectile.cs`
+  - `Assets/Scripts/Player/PlayerWeapon.cs`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP에서 투사체 적중 후 `Enemy HP 5->4`, `Ammo=29`, Console Error 0건을 확인했다.
+- 제한: HP 0 이후 사망 상태 연출/비활성화/드롭 보상은 아직 구현하지 않았다.
+
+## 2026-09-18 - Enemy Death
+
+- 내용: Enemy HP가 0이 되면 적의 행동과 충돌을 중지하고 시각 오브젝트는 남기는 사망 상태를 추가했다.
+- 기능:
+  - EnemyDeath 컴포넌트 분리
+  - EnemyAttack, BasicEnemyController, EnemyStun 비활성화
+  - Enemy Collider 비활성화 및 Rigidbody2D 시뮬레이션 중지
+  - 사망 상태 중복 실행 방지
+- 변경 파일:
+  - `Assets/Scripts/Enemies/EnemyDeath.cs`
+  - `Assets/Scripts/Enemies/EnemyDeath.cs.meta`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP에서 HP 0 후 `Dead=True`, 공격/컨트롤러/Collider 비활성화, Rigidbody 시뮬레이션 중지, Console Error 0건을 확인했다.
+- 제한: 사망 애니메이션, 시체 연출, 드롭 보상은 아직 구현하지 않았다.
+
+## 2026-09-18 - Enemy 기절 조건 정리
+
+- 내용: Enemy HP가 최대 HP의 30% 이하로 내려가면 자동으로 기절하도록 기존 EnemyStun을 확장했다.
+- 기능:
+  - HP 임계값 비율 Inspector 설정
+  - 임계값 진입 시 공격 1회 자동 기절
+  - Parry가 직접 호출하는 기존 Stun 흐름 유지
+  - 사망 상태에서는 임계값 기절 방지
+- 변경 파일:
+  - `Assets/Scripts/Enemies/EnemyStun.cs`
+  - `Assets/Prefabs/Enemies/BasicEnemy.prefab`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP에서 HP 5에 4 피해 후 `HP=1`, `IsStunned=True`, `IsDead=False`, Console Error 0건을 확인했다.
+- 제한: 기절 중 처형, 처형 보상, 적 등급별 기절 횟수는 아직 구현하지 않았다.
+
+## 2026-09-18 - Enemy Stagger/Stun 분리 및 상태 표시
+
+- 내용: 짧은 Stagger와 긴 Stun을 별도 상태로 분리하고 TestArena에서 상태를 확인할 수 있는 표시를 추가했다.
+- 기능:
+  - `EnemyStagger` 컴포넌트와 짧은 경직 지속 시간
+  - 일반 피해 시 `STAGGER`, HP 30% 이하 진입 시 `STUN`
+  - Stun 시작 시 진행 중인 Stagger 취소
+  - Stagger/Stun 중 EnemyAttack 방지
+  - 적 머리 위에 `STAGGER`(노란색), `STUN`(빨간색) 표시
+- 변경 파일:
+  - `Assets/Scripts/Enemies/EnemyStagger.cs`
+  - `Assets/Scripts/Enemies/EnemyStun.cs`
+  - `Assets/Scripts/Enemies/EnemyStatusDebugDisplay.cs`
+  - `Assets/Scripts/Combat/EnemyAttack.cs`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. MCP에서 일반 피해 후 `Stagger=True, Stun=False`, 임계값 피해 후 `Stagger=False, Stun=True`, 상태 텍스트 `STUN`, Console Error 0건을 확인했다.
+- 제한: Stun 상태에서의 Execution과 적 등급별 Stagger 횟수 규칙은 아직 구현하지 않았다.
+
+## 2026-09-18 - Player 기본 총기
+
+- 내용: 기존 `Player/Attack` 좌클릭 입력을 사용해 마우스 방향으로 기본 투사체를 발사하는 기능을 추가했다.
+- 기능:
+  - 발사 쿨다운과 투사체 속도/수명/크기 Inspector 설정
+  - 마우스 커서 방향 조준
+  - 런타임 투사체 생성 및 이동
+  - 투사체 충돌/수명 종료 처리
+  - MainCamera 태그가 없는 TestArena를 위한 카메라 fallback
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerWeapon.cs`
+  - `Assets/Scripts/Player/PlayerWeapon.cs.meta`
+  - `Assets/Scripts/Combat/PlayerProjectile.cs`
+  - `Assets/Scripts/Combat/PlayerProjectile.cs.meta`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP에서 발사 메서드를 실행해 `PlayerProjectile` 생성 확인, Console Error 0건.
+- 제한: 이번 단계에서는 탄약, 무기 교체, 적 HP/피해 적용을 구현하지 않았다.

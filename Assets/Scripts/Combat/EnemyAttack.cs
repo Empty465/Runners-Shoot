@@ -19,6 +19,7 @@ public class EnemyAttack : MonoBehaviour
 
     private BasicEnemyController enemyController;
     private EnemyStun enemyStun;
+    private EnemyStagger enemyStagger;
     private Collider2D attackHitboxCollider;
     private Coroutine attackRoutine;
     private float nextAttackTime;
@@ -33,6 +34,7 @@ public class EnemyAttack : MonoBehaviour
     {
         enemyController = GetComponent<BasicEnemyController>();
         enemyStun = GetComponent<EnemyStun>();
+        enemyStagger = GetComponent<EnemyStagger>();
 
         if (playerTarget == null && enemyController != null)
         {
@@ -77,7 +79,9 @@ public class EnemyAttack : MonoBehaviour
             playerTarget = player != null ? player.transform : null;
         }
 
-        if (playerTarget == null || attackRoutine != null || Time.time < nextAttackTime || (enemyStun != null && enemyStun.IsStunned))
+        if (playerTarget == null || attackRoutine != null || Time.time < nextAttackTime ||
+            (enemyStun != null && enemyStun.IsStunned) ||
+            (enemyStagger != null && enemyStagger.IsStaggered))
         {
             return;
         }
