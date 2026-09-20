@@ -79,6 +79,17 @@ public class EnemyAttack : MonoBehaviour
             playerTarget = player != null ? player.transform : null;
         }
 
+        if (IsAttackActive && playerTarget != null)
+        {
+            PlayerDodge playerDodge = playerTarget.GetComponent<PlayerDodge>();
+            if (playerDodge != null && playerDodge.TryRegisterSuccess())
+            {
+                CancelCurrentAttack();
+                Debug.Log("[Dodge] SUCCESS");
+                return;
+            }
+        }
+
         if (playerTarget == null || attackRoutine != null || Time.time < nextAttackTime ||
             (enemyStun != null && enemyStun.IsStunned) ||
             (enemyStagger != null && enemyStagger.IsStaggered))
@@ -185,6 +196,13 @@ public class EnemyAttack : MonoBehaviour
         PlayerParry playerParry = other.GetComponentInParent<PlayerParry>();
         if (playerParry != null && playerParry.IsParryActive)
         {
+            return;
+        }
+
+        PlayerDodge playerDodge = other.GetComponentInParent<PlayerDodge>();
+        if (playerDodge != null && playerDodge.TryRegisterSuccess())
+        {
+            Debug.Log("[Dodge] SUCCESS");
             return;
         }
 

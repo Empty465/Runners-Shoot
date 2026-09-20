@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer = ~0;
 
     private Rigidbody2D playerRigidbody;
+    private PlayerDodge playerDodge;
     private PlayerInput playerInput;
     private InputAction moveAction;
     private InputAction jumpAction;
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
+        playerDodge = GetComponent<PlayerDodge>();
         playerInput = GetComponent<PlayerInput>();
 
         InputActionMap playerActions = playerInput.actions.FindActionMap("Player", true);
@@ -56,6 +58,12 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (playerDodge != null && playerDodge.IsDodging)
+        {
+            jumpRequested = false;
+            return;
+        }
+
         playerRigidbody.linearVelocity = new Vector2(moveInput.x * moveSpeed, playerRigidbody.linearVelocity.y);
 
         if (jumpRequested)

@@ -172,9 +172,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3acd35509116d754ea573d9da66b2783, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDodge
-  dodgeSpeed: 14
-  dodgeDuration: 0.16
-  dodgeCooldown: 0.75
+  dodgeSpeed: 28
+  dodgeDuration: 0.18
+  dodgeCooldown: 0.7
   defaultDirection: 1
 --- !u!114 &1234567890123456781
 MonoBehaviour:

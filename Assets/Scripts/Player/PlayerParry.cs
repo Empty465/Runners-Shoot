@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,7 +7,7 @@ using UnityEngine.InputSystem;
 public class PlayerParry : MonoBehaviour
 {
     [Header("Parry")]
-    [SerializeField] private float parryDuration = 0.2f;
+    [SerializeField] private float parryDuration = 0.32f;
     [SerializeField] private float parryCooldown = 1f;
 
     [Header("Parry References")]
@@ -19,6 +20,7 @@ public class PlayerParry : MonoBehaviour
     private float nextParryTime;
 
     public bool IsParryActive { get; private set; }
+    public event Action ParrySucceeded;
 
     private void Awake()
     {
@@ -99,6 +101,7 @@ public class PlayerParry : MonoBehaviour
         }
 
         enemyAttack.CancelCurrentAttack();
+        ParrySucceeded?.Invoke();
         ShowParrySuccess();
         Debug.Log("[Parry] SUCCESS");
     }

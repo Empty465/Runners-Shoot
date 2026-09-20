@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,20 +7,23 @@ using UnityEngine.InputSystem;
 public class PlayerDodge : MonoBehaviour
 {
     [Header("Dodge")]
-    [SerializeField] private float dodgeSpeed = 14f;
-    [SerializeField] private float dodgeDuration = 0.16f;
-    [SerializeField] private float dodgeCooldown = 0.75f;
+    [SerializeField] private float dodgeSpeed = 28f;
+    [SerializeField] private float dodgeDuration = 0.18f;
+    [SerializeField] private float dodgeCooldown = 0.7f;
     [SerializeField] private float defaultDirection = 1f;
 
     private Rigidbody2D playerRigidbody;
     private PlayerInput playerInput;
     private InputAction moveAction;
     private InputAction dodgeAction;
+    private Camera playerCamera;
     private float nextDodgeTime;
     private float dodgeUntil;
     private int dodgeDirection;
+    private bool successRegistered;
 
     public bool IsDodging => Time.time < dodgeUntil;
+    public event Action DodgeSucceeded;
 
     private void Awake()
     {
@@ -29,6 +33,7 @@ public class PlayerDodge : MonoBehaviour
         InputActionMap playerActions = playerInput.actions.FindActionMap("Player", true);
         moveAction = playerActions.FindAction("Move", true);
         dodgeAction = playerActions.FindAction("Sprint", true);
+        playerCamera = Camera.main != null ? Camera.main : FindAnyObjectByType<Camera>();
     }
 
     private void OnEnable()
@@ -42,6 +47,7 @@ public class PlayerDodge : MonoBehaviour
         moveAction?.Disable();
         dodgeAction?.Disable();
         dodgeUntil = 0f;
+        successRegistered = false;
     }
 
     private void Update()
@@ -69,19 +75,55 @@ public class PlayerDodge : MonoBehaviour
             return;
         }
 
-        float horizontalInput = moveAction != null ? moveAction.ReadValue<Vector2>().x : 0f;
-        if (Mathf.Abs(horizontalInput) > 0.01f)
+        Vector2 moveInput = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+        if (Mathf.Abs(moveInput.x) > 0.01f)
         {
-            dodgeDirection = horizontalInput > 0f ? 1 : -1;
+            dodgeDirection = moveInput.x > 0f ? 1 : -1;
         }
-        else if (dodgeDirection == 0)
+        else
         {
-            dodgeDirection = defaultDirection >= 0f ? 1 : -1;
+            dodgeDirection = GetCursorDirection();
         }
 
         nextDodgeTime = Time.time + dodgeCooldown;
         dodgeUntil = Time.time + dodgeDuration;
+        successRegistered = false;
         playerRigidbody.linearVelocity = new Vector2(dodgeDirection * dodgeSpeed, 0f);
         Debug.Log("[PlayerDodge] Started direction=" + dodgeDirection);
+    }
+
+    public bool TryRegisterSuccess()
+    {
+        if (!IsDodging || successRegistered)
+        {
+            return false;
+        }
+
+        successRegistered = true;
+        DodgeSucceeded?.Invoke();
+        return true;
+    }
+
+    private int GetCursorDirection()
+    {
+        if (Mouse.current != null)
+        {
+            if (playerCamera == null)
+            {
+                playerCamera = Camera.main != null ? Camera.main : FindAnyObjectByType<Camera>();
+            }
+
+            if (playerCamera != null)
+            {
+                Vector3 cursorWorldPosition = playerCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+                float horizontalOffset = cursorWorldPosition.x - transform.position.x;
+                if (Mathf.Abs(horizontalOffset) > 0.01f)
+                {
+                    return horizontalOffset > 0f ? 1 : -1;
+                }
+            }
+        }
+
+        return defaultDirection >= 0f ? 1 : -1;
     }
 }

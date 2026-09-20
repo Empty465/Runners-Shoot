@@ -360,3 +360,104 @@
 - 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity MCP에서 Assets Refresh 후 TestArena Play Mode 진입 및 종료를 확인했고 Console Error가 없었다.
 - 제한: 이번 단계에서는 회피 무적 판정, 회피 성공 시 슬로우/강화 포인트 보상, 회피 전용 연출을 구현하지 않았다.
 - 다음 작업: 회피 무적 판정과 패링/회피 성공 보상 시스템을 별도 기능으로 연결한다.
+
+## 2026-09-20 - Player 회피 거리 및 속도 조정
+
+- 내용: 회피 대시가 더 빠르고 멀리 이동하도록 기본 튜닝값을 조정했다.
+- 변경:
+  - `dodgeSpeed`: 14 -> 22
+  - `dodgeDuration`: 0.16초 -> 0.22초
+  - `dodgeCooldown`: 0.75초 -> 0.7초
+  - 예상 대시 거리: 약 2.24 -> 4.84 유닛
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `Assets/Prefabs/Player/Player.prefab`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Assets Refresh 및 Play Mode 진입 후 Console Error 없이 종료를 확인했다.
+- 제한: 실제 키 입력에 따른 이동 거리 체감은 Editor에서 직접 플레이하며 추가 조정할 수 있다.
+
+## 2026-09-20 - Player 회피 방향 입력 개선
+
+- 내용: 회피 방향을 이동 키와 마우스 커서 기준으로 선택하도록 수정했다.
+- 동작:
+  - 이동 키를 누르고 있으면 해당 이동 벡터 방향으로 대시
+  - 이동 키 입력이 없으면 Player에서 마우스 커서가 있는 월드 방향으로 대시
+  - 카메라 또는 커서 방향을 계산할 수 없으면 기본 방향으로 대시
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Assets Refresh 후 Play Mode 진입, 컴파일 완료 및 Console Error 없음 확인.
+- 제한: 실제 키보드/마우스 입력에 따른 대시 방향 체감은 Editor에서 직접 플레이하며 추가 확인이 필요하다.
+
+## 2026-09-20 - Player 회피 수평 이동 제한
+
+- 내용: 마우스 커서 방향을 사용하더라도 회피는 수평으로만 이동하도록 수정했다.
+- 동작:
+  - 좌우 이동 키 입력이 있으면 입력 방향으로 수평 대시
+  - 좌우 입력이 없으면 커서의 Player 기준 좌우 위치로 수평 대시
+  - 마우스의 높이는 대시 방향에 영향을 주지 않음
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Play Mode 진입 후 Console Error 없이 종료를 확인했다.
+
+## 2026-09-20 - 패링/회피 성공 피드백 표시
+
+- 내용: 패링과 회피가 실제로 적 공격을 무효화했을 때 화면에 성공 메시지를 표시하도록 연결했다.
+- 기능:
+  - 패링 성공 시 청록색 `PARRY SUCCESS!` 표시
+  - 회피 중 적 공격을 피하면 노란색 `DODGE SUCCESS!` 표시
+  - 성공 메시지는 기존 테스트 HUD 상단에 0.8초 표시
+  - 한 번의 대시 동안 회피 성공은 1회만 등록
+  - 회피 성공 시 적 공격의 피해 적용을 중단
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerParry.cs`
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `Assets/Scripts/Combat/EnemyAttack.cs`
+  - `Assets/Scripts/UI/PlayerStatusDebugCanvas.cs`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Assets Refresh 후 Play Mode 진입 및 종료, Console Error 없음 확인.
+- 제한: 실제 공격 타이밍에 패링/회피 성공 메시지가 화면에 뜨는 장면 확인은 Editor에서 직접 전투를 재현해 추가 확인해야 한다.
+
+## 2026-09-20 - 패링/회피 판정 여유 조정
+
+- 내용: 패링과 회피의 활성 판정 시간을 늘리고, 공격 히트박스가 이미 활성화된 뒤에도 회피 성공을 확인하도록 보완했다.
+- 변경:
+  - PlayerParry 판정 시간: `0.2초 -> 0.32초`
+  - PlayerDodge 판정 시간: `0.22초 -> 0.32초`
+  - EnemyAttack가 활성 공격 중 PlayerDodge 상태를 매 프레임 확인
+  - 회피 중 공격을 피하면 공격을 취소하고 성공 처리
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerParry.cs`
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `Assets/Scripts/Combat/EnemyAttack.cs`
+  - `Assets/Prefabs/Player/Player.prefab`
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Refresh 후 MCP Play Mode 명령은 응답 지연으로 완료 확인이 되지 않았고, Unity 프로세스와 로그에서는 최근 컴파일/치명 오류가 발견되지 않았다.
+- 제한: 실제 전투에서 판정 체감은 Unity Editor에서 직접 패링/회피를 반복해 최종 조정해야 한다.
+
+## 2026-09-20 - 대쉬 이동 속도 덮어쓰기 수정
+
+- 문제: 회피 판정은 성공하지만 `PlayerController.FixedUpdate()`가 일반 이동 속도로 Rigidbody2D의 대쉬 속도를 덮어써 대쉬 이동이 보이지 않았다.
+- 수정:
+  - PlayerController가 PlayerDodge를 참조
+  - 대쉬 활성 중에는 일반 이동 및 점프 속도 적용을 건너뜀
+  - PlayerDodge가 설정한 수평 대쉬 속도를 유지
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerController.cs`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Play Mode 진입, 컴파일 완료, Console Error 없음 확인.
+
+## 2026-09-20 - 대쉬 속도 및 최종 거리 재조정
+
+- 내용: 대쉬가 더 빠르게 느껴지면서 최종 이동 거리는 줄어들도록 수치를 조정했다.
+- 변경:
+  - `dodgeSpeed`: 22 -> 28
+  - `dodgeDuration`: 0.32초 -> 0.18초
+  - 예상 이동 거리: 약 7.04 -> 5.04 유닛
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `Assets/Prefabs/Player/Player.prefab`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Assets Refresh 및 Play Mode 진입 후 Console Error 없이 종료를 확인했다.

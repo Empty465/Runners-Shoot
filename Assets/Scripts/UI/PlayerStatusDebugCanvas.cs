@@ -9,15 +9,22 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
     private PlayerHealth playerHealth;
     private PlayerWeapon playerWeapon;
+    private PlayerParry playerParry;
+    private PlayerDodge playerDodge;
     private Text statusText;
+    private Text feedbackText;
+    private float feedbackUntil;
 
     private void Awake()
     {
         playerHealth = FindAnyObjectByType<PlayerHealth>();
         playerWeapon = FindAnyObjectByType<PlayerWeapon>();
+        playerParry = FindAnyObjectByType<PlayerParry>();
+        playerDodge = FindAnyObjectByType<PlayerDodge>();
         CreateStatusText();
         SubscribeToHealthChanges();
         SubscribeToAmmoChanges();
+        SubscribeToCombatFeedback();
         UpdateStatusText();
     }
 
@@ -33,6 +40,18 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             playerWeapon = FindAnyObjectByType<PlayerWeapon>();
             SubscribeToAmmoChanges();
+        }
+
+        if (playerParry == null)
+        {
+            playerParry = FindAnyObjectByType<PlayerParry>();
+            SubscribeToCombatFeedback();
+        }
+
+        if (playerDodge == null)
+        {
+            playerDodge = FindAnyObjectByType<PlayerDodge>();
+            SubscribeToCombatFeedback();
         }
 
         if (playerHealth != null)
@@ -55,7 +74,23 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             SubscribeToAmmoChanges();
         }
 
+        if (playerParry == null)
+        {
+            playerParry = FindAnyObjectByType<PlayerParry>();
+            SubscribeToCombatFeedback();
+        }
+
+        if (playerDodge == null)
+        {
+            playerDodge = FindAnyObjectByType<PlayerDodge>();
+            SubscribeToCombatFeedback();
+        }
+
         UpdateStatusText();
+        if (feedbackText != null && Time.time >= feedbackUntil)
+        {
+            feedbackText.text = string.Empty;
+        }
     }
 
     private void SubscribeToHealthChanges()
@@ -92,6 +127,43 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         UpdateStatusText();
     }
 
+    private void SubscribeToCombatFeedback()
+    {
+        if (playerParry != null)
+        {
+            playerParry.ParrySucceeded -= OnParrySucceeded;
+            playerParry.ParrySucceeded += OnParrySucceeded;
+        }
+
+        if (playerDodge != null)
+        {
+            playerDodge.DodgeSucceeded -= OnDodgeSucceeded;
+            playerDodge.DodgeSucceeded += OnDodgeSucceeded;
+        }
+    }
+
+    private void OnParrySucceeded()
+    {
+        ShowCombatFeedback("PARRY SUCCESS!", new Color(0.3f, 0.9f, 1f));
+    }
+
+    private void OnDodgeSucceeded()
+    {
+        ShowCombatFeedback("DODGE SUCCESS!", new Color(1f, 0.85f, 0.2f));
+    }
+
+    private void ShowCombatFeedback(string message, Color color)
+    {
+        if (feedbackText == null)
+        {
+            return;
+        }
+
+        feedbackText.text = message;
+        feedbackText.color = color;
+        feedbackUntil = Time.time + 0.8f;
+    }
+
     private void UpdateStatusText()
     {
         if (statusText == null || playerHealth == null)
@@ -121,6 +193,16 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         if (playerWeapon != null)
         {
             playerWeapon.AmmoChanged -= OnAmmoChanged;
+        }
+
+        if (playerParry != null)
+        {
+            playerParry.ParrySucceeded -= OnParrySucceeded;
+        }
+
+        if (playerDodge != null)
+        {
+            playerDodge.DodgeSucceeded -= OnDodgeSucceeded;
         }
     }
 
@@ -152,5 +234,24 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         textTransform.pivot = new Vector2(0f, 1f);
         textTransform.anchoredPosition = new Vector2(screenOffset.x, -screenOffset.y);
         textTransform.sizeDelta = new Vector2(420f, 80f);
+
+        GameObject feedbackObject = new GameObject("PlayerCombatFeedbackText");
+        feedbackObject.transform.SetParent(canvasObject.transform, false);
+
+        feedbackText = feedbackObject.AddComponent<Text>();
+        feedbackText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        feedbackText.fontSize = 32;
+        feedbackText.fontStyle = FontStyle.Bold;
+        feedbackText.alignment = TextAnchor.UpperCenter;
+        feedbackText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        feedbackText.verticalOverflow = VerticalWrapMode.Overflow;
+        feedbackText.text = string.Empty;
+
+        RectTransform feedbackTransform = feedbackText.rectTransform;
+        feedbackTransform.anchorMin = new Vector2(0.5f, 1f);
+        feedbackTransform.anchorMax = new Vector2(0.5f, 1f);
+        feedbackTransform.pivot = new Vector2(0.5f, 1f);
+        feedbackTransform.anchoredPosition = new Vector2(0f, -screenOffset.y - 60f);
+        feedbackTransform.sizeDelta = new Vector2(600f, 60f);
     }
 }

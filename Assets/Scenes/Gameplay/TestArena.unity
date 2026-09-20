@@ -671,7 +671,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f244329ffe078645ad9617df2cb5621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerParry
-  parryDuration: 0.2
+  parryDuration: 0.32
   parryCooldown: 1
   parryHitbox: {fileID: 81808793}
   parryDebugVisual: {fileID: 1357723602}
