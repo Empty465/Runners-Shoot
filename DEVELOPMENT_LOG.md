@@ -342,3 +342,21 @@
   - `DEVELOPMENT_LOG.md`
 - 검증: `dotnet build Assembly-CSharp.csproj` 성공. Unity MCP에서 발사 메서드를 실행해 `PlayerProjectile` 생성 확인, Console Error 0건.
 - 제한: 이번 단계에서는 탄약, 무기 교체, 적 HP/피해 적용을 구현하지 않았다.
+
+## 2026-09-20 - Player 회피 대시 프로토타입
+
+- 내용: 기존 `Player/Sprint` 입력(Left Shift)을 재사용해 Player 회피 대시를 추가했다.
+- 기능:
+  - 좌우 입력 방향으로 대시
+  - 입력 방향이 없으면 마지막 방향 또는 기본 오른쪽 방향 사용
+  - 공중에서도 사용 가능
+  - 대시 지속 시간과 쿨다운 Inspector 설정
+  - 대시 중 Rigidbody2D 수평 속도 고정
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `Assets/Scripts/Player/PlayerDodge.cs.meta`
+  - `Assets/Prefabs/Player/Player.prefab`
+  - `DEVELOPMENT_LOG.md`
+- 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity MCP에서 Assets Refresh 후 TestArena Play Mode 진입 및 종료를 확인했고 Console Error가 없었다.
+- 제한: 이번 단계에서는 회피 무적 판정, 회피 성공 시 슬로우/강화 포인트 보상, 회피 전용 연출을 구현하지 않았다.
+- 다음 작업: 회피 무적 판정과 패링/회피 성공 보상 시스템을 별도 기능으로 연결한다.
