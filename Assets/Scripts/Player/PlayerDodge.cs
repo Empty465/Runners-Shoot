@@ -11,12 +11,14 @@ public class PlayerDodge : MonoBehaviour
     [SerializeField] private float dodgeDuration = 0.18f;
     [SerializeField] private float dodgeCooldown = 0.7f;
     [SerializeField] private float defaultDirection = 1f;
+    [SerializeField] private int enhancementPointsPerDodge = 1;
 
     private Rigidbody2D playerRigidbody;
     private PlayerInput playerInput;
     private InputAction moveAction;
     private InputAction dodgeAction;
     private Camera playerCamera;
+    private PlayerEnhancementPoints enhancementPoints;
     private float nextDodgeTime;
     private float dodgeUntil;
     private int dodgeDirection;
@@ -29,6 +31,11 @@ public class PlayerDodge : MonoBehaviour
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
         playerInput = GetComponent<PlayerInput>();
+        enhancementPoints = GetComponent<PlayerEnhancementPoints>();
+        if (enhancementPoints == null)
+        {
+            enhancementPoints = gameObject.AddComponent<PlayerEnhancementPoints>();
+        }
 
         InputActionMap playerActions = playerInput.actions.FindActionMap("Player", true);
         moveAction = playerActions.FindAction("Move", true);
@@ -100,6 +107,11 @@ public class PlayerDodge : MonoBehaviour
         }
 
         successRegistered = true;
+        if (enhancementPoints != null)
+        {
+            enhancementPoints.AddPoints(enhancementPointsPerDodge);
+        }
+
         DodgeSucceeded?.Invoke();
         return true;
     }

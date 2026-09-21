@@ -9,6 +9,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
     private PlayerHealth playerHealth;
     private PlayerWeapon playerWeapon;
+    private PlayerEnhancementPoints enhancementPoints;
     private PlayerParry playerParry;
     private PlayerDodge playerDodge;
     private Text statusText;
@@ -19,6 +20,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     {
         playerHealth = FindAnyObjectByType<PlayerHealth>();
         playerWeapon = FindAnyObjectByType<PlayerWeapon>();
+        enhancementPoints = FindAnyObjectByType<PlayerEnhancementPoints>();
         playerParry = FindAnyObjectByType<PlayerParry>();
         playerDodge = FindAnyObjectByType<PlayerDodge>();
         CreateStatusText();
@@ -40,6 +42,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             playerWeapon = FindAnyObjectByType<PlayerWeapon>();
             SubscribeToAmmoChanges();
+        }
+
+        if (enhancementPoints == null)
+        {
+            enhancementPoints = FindAnyObjectByType<PlayerEnhancementPoints>();
+            SubscribeToEnhancementPointChanges();
         }
 
         if (playerParry == null)
@@ -72,6 +80,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             playerWeapon = FindAnyObjectByType<PlayerWeapon>();
             SubscribeToAmmoChanges();
+        }
+
+        if (enhancementPoints == null)
+        {
+            enhancementPoints = FindAnyObjectByType<PlayerEnhancementPoints>();
+            SubscribeToEnhancementPointChanges();
         }
 
         if (playerParry == null)
@@ -127,6 +141,20 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         UpdateStatusText();
     }
 
+    private void SubscribeToEnhancementPointChanges()
+    {
+        if (enhancementPoints != null)
+        {
+            enhancementPoints.PointsChanged -= OnEnhancementPointsChanged;
+            enhancementPoints.PointsChanged += OnEnhancementPointsChanged;
+        }
+    }
+
+    private void OnEnhancementPointsChanged(int currentPoints)
+    {
+        UpdateStatusText();
+    }
+
     private void SubscribeToCombatFeedback()
     {
         if (playerParry != null)
@@ -178,6 +206,11 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             statusText.text += $" | AMMO: {playerWeapon.CurrentAmmo}/{playerWeapon.MaxAmmo}";
         }
+
+        if (enhancementPoints != null)
+        {
+            statusText.text += $" | POINTS: {enhancementPoints.CurrentPoints}/{enhancementPoints.MaxPoints}";
+        }
     }
 
     private void OnDisable()
@@ -193,6 +226,11 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         if (playerWeapon != null)
         {
             playerWeapon.AmmoChanged -= OnAmmoChanged;
+        }
+
+        if (enhancementPoints != null)
+        {
+            enhancementPoints.PointsChanged -= OnEnhancementPointsChanged;
         }
 
         if (playerParry != null)

@@ -9,6 +9,7 @@ public class PlayerParry : MonoBehaviour
     [Header("Parry")]
     [SerializeField] private float parryDuration = 0.32f;
     [SerializeField] private float parryCooldown = 1f;
+    [SerializeField] private int enhancementPointsPerParry = 1;
 
     [Header("Parry References")]
     [SerializeField] private GameObject parryHitbox;
@@ -17,6 +18,7 @@ public class PlayerParry : MonoBehaviour
 
     private Coroutine parryRoutine;
     private Coroutine successVisualRoutine;
+    private PlayerEnhancementPoints enhancementPoints;
     private float nextParryTime;
 
     public bool IsParryActive { get; private set; }
@@ -24,6 +26,12 @@ public class PlayerParry : MonoBehaviour
 
     private void Awake()
     {
+        enhancementPoints = GetComponent<PlayerEnhancementPoints>();
+        if (enhancementPoints == null)
+        {
+            enhancementPoints = gameObject.AddComponent<PlayerEnhancementPoints>();
+        }
+
         if (parryHitbox == null)
         {
             Transform hitboxTransform = transform.Find("ParryHitbox");
@@ -101,6 +109,7 @@ public class PlayerParry : MonoBehaviour
         }
 
         enemyAttack.CancelCurrentAttack();
+        enhancementPoints.AddPoints(enhancementPointsPerParry);
         ParrySucceeded?.Invoke();
         ShowParrySuccess();
         Debug.Log("[Parry] SUCCESS");

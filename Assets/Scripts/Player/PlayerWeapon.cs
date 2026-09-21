@@ -14,6 +14,11 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private float projectileSize = 0.16f;
     [SerializeField] private Color projectileColor = Color.yellow;
 
+    [Header("Upgrade")]
+    [SerializeField] private int upgradeCost = 1;
+    [SerializeField] private float damageUpgradeAmount = 0.5f;
+    [SerializeField] private float speedUpgradeAmount = 1.5f;
+
     [Header("Ammo")]
     [SerializeField] private int maxAmmo = 30;
     [SerializeField] private int startingAmmo = 30;
@@ -21,6 +26,7 @@ public class PlayerWeapon : MonoBehaviour
     private PlayerInput playerInput;
     private InputAction attackAction;
     private Camera playerCamera;
+    private PlayerEnhancementPoints enhancementPoints;
     private float nextFireTime;
 
     public event Action<int> AmmoChanged;
@@ -30,6 +36,12 @@ public class PlayerWeapon : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+        enhancementPoints = GetComponent<PlayerEnhancementPoints>();
+        if (enhancementPoints == null)
+        {
+            enhancementPoints = gameObject.AddComponent<PlayerEnhancementPoints>();
+        }
+
         InputActionMap playerActions = playerInput.actions.FindActionMap("Player", true);
         attackAction = playerActions.FindAction("Attack", true);
         playerCamera = FindPlayerCamera();
@@ -49,6 +61,11 @@ public class PlayerWeapon : MonoBehaviour
 
     private void Update()
     {
+        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            TryUpgradeWeapon();
+        }
+
         if (attackAction != null && attackAction.WasPressedThisFrame() && Time.time >= nextFireTime)
         {
             Fire();
@@ -91,6 +108,19 @@ public class PlayerWeapon : MonoBehaviour
         PlayerProjectile projectile = projectileObject.AddComponent<PlayerProjectile>();
         projectile.Initialize(direction, projectileSpeed, projectileDamage, projectileLifetime, transform);
         Debug.Log("[PlayerWeapon] Fired");
+    }
+
+    public bool TryUpgradeWeapon()
+    {
+        if (enhancementPoints == null || !enhancementPoints.TrySpendPoints(upgradeCost))
+        {
+            return false;
+        }
+
+        projectileDamage += damageUpgradeAmount;
+        projectileSpeed += speedUpgradeAmount;
+        Debug.Log($"[PlayerWeapon] Upgraded: damage={projectileDamage:F1}, speed={projectileSpeed:F1}");
+        return true;
     }
 
     public void RestoreAmmo(int amount)
