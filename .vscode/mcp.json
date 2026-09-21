@@ -2,7 +2,7 @@
   "servers": {
     "unity": {
       "type": "stdio",
-      "command": "C:\\Users\\ytnor\\AppData\\Local\\Unity\\bin\\unity.exe",
+      "command": "${userHome}\\AppData\\Local\\Unity\\bin\\unity.exe",
       "args": [
         "mcp"
       ]

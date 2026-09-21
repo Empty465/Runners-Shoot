@@ -374,6 +374,19 @@
   - `Assets/Prefabs/Player/Player.prefab`
   - `DEVELOPMENT_LOG.md`
 - 검증: C# 진단 오류 없음. `dotnet build Assembly-CSharp.csproj --no-restore` 성공. Unity Assets Refresh 및 Play Mode 진입 후 Console Error 없이 종료를 확인했다.
+
+## 2026-09-21 - Unity MCP 사용자 경로 이식성 수정
+
+- 문제: `.vscode/mcp.json`이 데스크톱 사용자 `ytnor`의 절대 경로를 사용해 노트북 사용자 `admin` 환경에서 동일한 설정을 재사용할 수 없었다.
+- 수정:
+  - Unity MCP 실행 경로를 `${userHome}\\AppData\\Local\\Unity\\bin\\unity.exe`로 변경
+  - 컴퓨터별 Windows 사용자명을 설정 파일에 직접 기록하지 않도록 수정
+- 변경 파일:
+  - `.vscode/mcp.json`
+  - `DEVELOPMENT_LOG.md`
+- 검증: JSON 파싱 성공, `${userHome}`이 현재 `C:\\Users\\admin`으로 해석됨, 실제 Unity MCP 실행 파일 존재 확인.
+- 제한: 데스크톱에서도 Unity MCP 실행 파일이 사용자 홈의 동일한 상대 경로에 설치되어 있어야 한다.
+- 다음 작업: 데스크톱 복귀 후 VS Code에서 `Developer: Reload Window` 또는 `MCP: Restart Server`를 한 번 실행하고 MCP 서버 상태를 확인한다.
 - 제한: 실제 키 입력에 따른 이동 거리 체감은 Editor에서 직접 플레이하며 추가 조정할 수 있다.
 
 ## 2026-09-20 - Player 회피 방향 입력 개선
