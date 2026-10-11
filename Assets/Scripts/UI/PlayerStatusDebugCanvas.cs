@@ -6,6 +6,8 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     [SerializeField] private Vector2 screenOffset = new(20f, 20f);
     [SerializeField] private int fontSize = 24;
     [SerializeField] private Color textColor = Color.white;
+    [SerializeField] private float damageShakeDuration = 0.16f;
+    [SerializeField] private float damageShakeStrength = 0.08f;
 
     private PlayerHealth playerHealth;
     private PlayerWeapon playerWeapon;
@@ -24,8 +26,10 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private float feedbackUntil;
     private Image damageFlashOverlay;
     private float damageFlashRemaining;
-    private float previousHealth;
-    private float previousArmor;
+    private Transform damageShakeCamera;
+    private Vector3 damageShakeOrigin;
+    private float damageShakeRemaining;
+    private float activeDamageShakeDuration;
 
     private const float DamageFlashDuration = 0.38f;
 
@@ -36,13 +40,14 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         enhancementPoints = FindPlayerComponent<PlayerEnhancementPoints>();
         playerParry = FindPlayerComponent<PlayerParry>();
         playerDodge = FindPlayerComponent<PlayerDodge>();
-        CreateStatusText();
-        if (playerHealth != null)
+        Camera mainCamera = Camera.main != null ? Camera.main : FindAnyObjectByType<Camera>();
+        damageShakeCamera = mainCamera != null ? mainCamera.transform : null;
+        if (damageShakeCamera != null)
         {
-            previousHealth = playerHealth.CurrentHealth;
-            previousArmor = playerHealth.CurrentArmor;
+            damageShakeOrigin = damageShakeCamera.localPosition;
         }
 
+        CreateStatusText();
         SubscribeToHealthChanges();
         SubscribeToAmmoChanges();
         SubscribeToCombatFeedback();
@@ -54,12 +59,6 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         if (playerHealth == null)
         {
             playerHealth = FindPlayerComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                previousHealth = playerHealth.CurrentHealth;
-                previousArmor = playerHealth.CurrentArmor;
-            }
-
             SubscribeToHealthChanges();
         }
 
@@ -100,6 +99,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             damageFlashOverlay.color = flashColor;
         }
 
+        UpdateDamageShake();
         UpdateStatusText();
     }
 
@@ -112,40 +112,72 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
         playerHealth.HealthChanged += OnHealthChanged;
         playerHealth.ArmorChanged += OnArmorChanged;
+        playerHealth.DamageTaken += OnDamageTaken;
     }
 
     private void OnHealthChanged(float currentHealth)
     {
-        if (currentHealth < previousHealth)
-        {
-            ShowDamageFlash(new Color(1f, 0.16f, 0.2f, 1f));
-        }
-
-        previousHealth = currentHealth;
         UpdateStatusText();
     }
 
     private void OnArmorChanged(float currentArmor)
     {
-        if (currentArmor < previousArmor)
-        {
-            ShowDamageFlash(new Color(1f, 0.55f, 0.16f, 1f));
-        }
-
-        previousArmor = currentArmor;
         UpdateStatusText();
+    }
+
+    private void OnDamageTaken(bool damagedArmor)
+    {
+        ShowDamageFlash(damagedArmor
+            ? new Color(1f, 0.55f, 0.16f, 1f)
+            : new Color(1f, 0.16f, 0.2f, 1f));
     }
 
     private void ShowDamageFlash(Color color)
     {
-        if (damageFlashOverlay == null)
+        if (damageFlashOverlay != null)
+        {
+            color.a = 0.24f;
+            damageFlashOverlay.color = color;
+            damageFlashRemaining = DamageFlashDuration;
+        }
+
+        if (damageShakeCamera == null)
+        {
+            Camera mainCamera = Camera.main != null ? Camera.main : FindAnyObjectByType<Camera>();
+            damageShakeCamera = mainCamera != null ? mainCamera.transform : null;
+        }
+
+        if (damageShakeCamera != null)
+        {
+            if (damageShakeRemaining <= 0f)
+            {
+                damageShakeOrigin = damageShakeCamera.localPosition;
+            }
+
+            activeDamageShakeDuration = Mathf.Max(0.01f, damageShakeDuration);
+            damageShakeRemaining = activeDamageShakeDuration;
+        }
+    }
+
+    private void UpdateDamageShake()
+    {
+        if (damageShakeCamera == null || damageShakeRemaining <= 0f)
         {
             return;
         }
 
-        color.a = 0.24f;
-        damageFlashOverlay.color = color;
-        damageFlashRemaining = DamageFlashDuration;
+        damageShakeRemaining = Mathf.Max(0f, damageShakeRemaining - Time.unscaledDeltaTime);
+        if (damageShakeRemaining <= 0f)
+        {
+            damageShakeCamera.localPosition = damageShakeOrigin;
+            return;
+        }
+
+        float intensity = damageShakeRemaining / activeDamageShakeDuration;
+        Vector2 offset = new Vector2(
+            Mathf.Sin(Time.unscaledTime * 61f),
+            Mathf.Cos(Time.unscaledTime * 47f)).normalized * (damageShakeStrength * intensity);
+        damageShakeCamera.localPosition = damageShakeOrigin + new Vector3(offset.x, offset.y, 0f);
     }
 
     private void SubscribeToAmmoChanges()
@@ -282,6 +314,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             playerHealth.HealthChanged -= OnHealthChanged;
             playerHealth.ArmorChanged -= OnArmorChanged;
+            playerHealth.DamageTaken -= OnDamageTaken;
         }
 
         if (playerWeapon != null)
@@ -311,6 +344,13 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             flashColor.a = 0f;
             damageFlashOverlay.color = flashColor;
         }
+
+        if (damageShakeRemaining > 0f && damageShakeCamera != null)
+        {
+            damageShakeCamera.localPosition = damageShakeOrigin;
+        }
+
+        damageShakeRemaining = 0f;
     }
 
     private static T FindPlayerComponent<T>() where T : Component

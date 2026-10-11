@@ -12,6 +12,7 @@ public class PlayerHealth : MonoBehaviour
 
     public event Action<float> HealthChanged;
     public event Action<float> ArmorChanged;
+    public event Action<bool> DamageTaken;
     public float MaxHealth => maxHealth;
     public float CurrentHealth { get; private set; }
     public float MaxArmor => maxArmor;
@@ -36,12 +37,14 @@ public class PlayerHealth : MonoBehaviour
         if (CurrentArmor > 0f)
         {
             CurrentArmor = Mathf.Max(0f, CurrentArmor - damage);
+            DamageTaken?.Invoke(true);
             ArmorChanged?.Invoke(CurrentArmor);
             Debug.Log($"[Player] Armor Damaged: {CurrentArmor}/{MaxArmor}");
             return;
         }
 
         CurrentHealth = Mathf.Max(0f, CurrentHealth - damage);
+        DamageTaken?.Invoke(false);
         HealthChanged?.Invoke(CurrentHealth);
         Debug.Log($"[Player] Damaged: {CurrentHealth}/{MaxHealth}");
 
