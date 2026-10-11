@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerDeathHandler : MonoBehaviour
@@ -34,6 +35,27 @@ public class PlayerDeathHandler : MonoBehaviour
         {
             playerHealth.Died -= HandleDeath;
         }
+    }
+
+    private void Update()
+    {
+        if (deathHandled && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            RetryCurrentScene();
+        }
+    }
+
+    private void RetryCurrentScene()
+    {
+        Scene activeScene = SceneManager.GetActiveScene();
+        if (activeScene.buildIndex < 0)
+        {
+            Debug.LogError($"[PlayerDeathHandler] Cannot retry scene '{activeScene.name}' because it is not in Build Settings");
+            return;
+        }
+
+        Debug.Log($"[PlayerDeathHandler] Reloading scene '{activeScene.name}'");
+        SceneManager.LoadScene(activeScene.buildIndex);
     }
 
     private void HandleDeath()

@@ -625,7 +625,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         CreateLabel(
             defeatOverlay.transform,
             "DefeatSubtitle",
-            "COMBAT ENDED",
+            "PRESS R TO RETRY",
             18,
             new Color(0.88f, 0.78f, 0.8f),
             new Vector2(0.5f, 0.5f),

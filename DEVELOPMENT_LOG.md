@@ -103,12 +103,25 @@
 - 변경:
   - PlayerHealth가 HP 0 도달 시 `Died` 이벤트를 한 번 발생시킨다.
   - PlayerDeathHandler가 입력 및 플레이어 동작 컴포넌트를 비활성화하고 Rigidbody를 정지/고정한다.
-  - HUD는 저체력 경고를 숨기고 화면 중앙에 `DEFEATED / COMBAT ENDED` 오버레이를 표시한다.
+  - HUD는 저체력 경고를 숨기고 화면 중앙에 패배 오버레이를 표시한다.
   - Player Prefab에 사망 핸들러를 추가해 해당 Prefab을 사용하는 씬에 적용한다.
 - 검증:
   - Unity C# 프로젝트 빌드 성공, 경고/오류 0건.
   - `git diff --check` 통과.
   - Unity Play Mode에서 실제 사망 입력/피드백은 확인하지 않았다.
+
+## 2026-10-11 - 패배 후 씬 재시작
+
+- 내용: 플레이어 사망 화면에서 R 키를 누르면 현재 씬을 다시 로드한다.
+- 변경:
+  - 패배 상태에서만 R 키가 재시작 입력으로 처리되며, 생존 중의 R 무기 강화와 충돌하지 않는다.
+  - 패배 화면에 `PRESS R TO RETRY` 안내를 표시한다.
+  - TestArena를 Build Settings에 등록해 해당 씬에서도 재시작할 수 있도록 했다.
+  - 현재 씬이 Build Settings에 없을 경우 재시작 실패를 명시적으로 Console 오류로 알린다.
+- 검증:
+  - Unity C# 프로젝트 빌드 성공, 경고/오류 0건.
+  - `git diff --check` 통과.
+  - Unity Play Mode에서 사망 후 씬 재로드는 아직 검증하지 않았다.
 
 ## 2026-10-11 - 플레이어 피격 화면 플래시
 
