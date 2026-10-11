@@ -10,6 +10,10 @@ public class EnemyAttack : MonoBehaviour
     [SerializeField] private float attackCooldown = 2f;
     [SerializeField] private float attackWindup = 0.5f;
     [SerializeField] private float attackActiveTime = 0.2f;
+    [SerializeField] private bool rangedAttack;
+    [SerializeField] private bool parryable = true;
+    [SerializeField] private float projectileSpeed = 8f;
+    [SerializeField] private Color projectileColor = Color.white;
 
     [Header("Attack References")]
     [SerializeField] private Transform playerTarget;
@@ -39,6 +43,8 @@ public class EnemyAttack : MonoBehaviour
 
     public event Action<Collider2D> AttackHit;
     public float AttackDamage => attackDamage;
+    public float AttackRange => attackRange;
+    public bool IsBusy => attackRoutine != null;
     public bool IsWindupActive { get; private set; }
     public bool IsAttackActive => attackHitbox != null && attackHitbox.activeSelf;
 
@@ -142,6 +148,26 @@ public class EnemyAttack : MonoBehaviour
         }
     }
 
+    public void ConfigureAttack(
+        float range,
+        float damage,
+        float cooldown,
+        float windup,
+        bool useRangedAttack,
+        bool canBeParried,
+        float speed,
+        Color color)
+    {
+        attackRange = Mathf.Max(0.1f, range);
+        attackDamage = Mathf.Max(0f, damage);
+        attackCooldown = Mathf.Max(0.1f, cooldown);
+        attackWindup = Mathf.Max(0f, windup);
+        rangedAttack = useRangedAttack;
+        parryable = canBeParried;
+        projectileSpeed = Mathf.Max(0.1f, speed);
+        projectileColor = color;
+    }
+
     private IEnumerator AttackRoutine()
     {
         nextAttackTime = Time.time + attackCooldown;
@@ -162,10 +188,17 @@ public class EnemyAttack : MonoBehaviour
             ResetAttackVisuals();
         }
 
-        PositionAttackHitbox();
-        if (attackHitbox != null)
+        if (rangedAttack)
         {
-            attackHitbox.SetActive(true);
+            FireProjectile();
+        }
+        else
+        {
+            PositionAttackHitbox();
+            if (attackHitbox != null)
+            {
+                attackHitbox.SetActive(true);
+            }
         }
 
         yield return new WaitForSeconds(attackActiveTime);
@@ -178,9 +211,42 @@ public class EnemyAttack : MonoBehaviour
         attackRoutine = null;
     }
 
+    private void FireProjectile()
+    {
+        if (playerTarget == null)
+        {
+            return;
+        }
+
+        Vector2 direction = ((Vector2)playerTarget.position - (Vector2)transform.position).normalized;
+        GameObject projectileObject = new GameObject("EnemyProjectile");
+        projectileObject.layer = gameObject.layer;
+        projectileObject.transform.position = transform.position + (Vector3)(direction * 0.7f);
+        projectileObject.transform.right = direction;
+        projectileObject.transform.localScale = Vector3.one * 0.22f;
+
+        SpriteRenderer spriteRenderer = projectileObject.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = Sprite.Create(
+            Texture2D.whiteTexture,
+            new Rect(0f, 0f, 1f, 1f),
+            new Vector2(0.5f, 0.5f),
+            1f);
+        spriteRenderer.color = projectileColor;
+        spriteRenderer.sortingOrder = 12;
+
+        Rigidbody2D projectileRigidbody = projectileObject.AddComponent<Rigidbody2D>();
+        projectileRigidbody.bodyType = RigidbodyType2D.Kinematic;
+
+        CircleCollider2D projectileCollider = projectileObject.AddComponent<CircleCollider2D>();
+        projectileCollider.isTrigger = true;
+
+        EnemyProjectile projectile = projectileObject.AddComponent<EnemyProjectile>();
+        projectile.Initialize(direction, projectileSpeed, attackDamage, parryable, transform);
+    }
+
     public bool TryRegisterParry()
     {
-        if (!IsAttackActive || parryProcessed)
+        if (!parryable || !IsAttackActive || parryProcessed)
         {
             return false;
         }

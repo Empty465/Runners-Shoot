@@ -279,6 +279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eca91794174bb4d4e83afacfacab50c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasicEnemyController
+  archetype: 2
   detectionRange: 8
   playerTarget: {fileID: 0}
   visual: {fileID: 1598886278478037869}

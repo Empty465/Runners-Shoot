@@ -147,7 +147,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.1}
-  m_LocalScale: {x: 20, y: 1, z: 1}
+  m_LocalScale: {x: 32, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1980079703}
@@ -2963,7 +2963,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 6
+  orthographic size: 9.5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -3008,7 +3008,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 7.9, z: 5.4}
-  m_LocalScale: {x: 20.8, y: 0.18, z: 0.2}
+  m_LocalScale: {x: 32.8, y: 0.18, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 553305262}
@@ -3119,7 +3119,7 @@ Transform:
   m_GameObject: {fileID: 1514221322}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.35, y: 3, z: 5.4}
+  m_LocalPosition: {x: -16.35, y: 3, z: 5.4}
   m_LocalScale: {x: 0.18, y: 8, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3504,7 +3504,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 20, y: 1}
+  m_Size: {x: 32, y: 1}
   m_EdgeRadius: 0
 --- !u!1 &2025073446
 GameObject:
@@ -3565,7 +3565,7 @@ Transform:
   m_GameObject: {fileID: 2076605733}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10.35, y: 3, z: 5.4}
+  m_LocalPosition: {x: 16.35, y: 3, z: 5.4}
   m_LocalScale: {x: 0.18, y: 8, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3757,7 +3757,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4889544791663451394, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4889544791663451394, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: m_LocalPosition.y

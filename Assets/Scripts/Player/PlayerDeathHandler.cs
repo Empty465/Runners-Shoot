@@ -23,6 +23,11 @@ public class PlayerDeathHandler : MonoBehaviour
         }
 
         playerHealth.Died += HandleDeath;
+    }
+
+    // PlayerHealth.Awake may not have run yet during OnEnable, so IsDead is only reliable from Start.
+    private void Start()
+    {
         if (playerHealth.IsDead)
         {
             HandleDeath();

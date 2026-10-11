@@ -3,6 +3,61 @@
 이 파일은 Unity 프로젝트의 기능 추가 및 수정 내역을 기록한다.
 각 기능은 구현 범위, 변경 파일, 검증 결과, 다음 작업을 남긴다.
 
+## 2026-10-11 - 적 테스트 아레나 확장
+
+- 내용: TestArena의 전투 공간을 확장하고 다섯 적 Archetype을 한 번에 테스트하도록 배치했다.
+- 기능:
+  - 바닥과 상단/측면 프레임 폭을 20유닛에서 32유닛으로 넓히고 테스트 카메라 범위를 조정했다.
+  - Play Mode 시작 시 기존 Knight 인스턴스의 전투 구성요소를 복제해 Slag, Pawn, Archer, Baron을 각각 테스트 위치에 추가한다.
+  - 모든 테스트 적의 감지 범위를 4.5유닛으로 제한하고 Knight도 시작 위치에서 물려 배치해, 시작 직후 공격으로 플레이어 조작이 막히지 않게 했다. 플레이어가 가까이 가면 각 적 AI가 활성화된다.
+  - 모든 적 머리 위에 색상별 `TEST: <이름>` 라벨을 표시해 임시로 구분한다.
+- 변경 파일:
+  - `Assets/Scenes/Gameplay/TestArena.unity`
+  - `Assets/Scripts/Enemies/BasicEnemyController.cs`
+  - `Assets/Scripts/Enemies/EnemyStatusDebugDisplay.cs`
+  - `Assets/Scripts/Player/PlayerDeathHandler.cs`
+  - `README.md`
+- 검증:
+  - `dotnet build "Assembly-CSharp.csproj" --no-restore` 성공, 경고/오류 0건.
+  - `git diff --check` 통과. TestArena 바닥/프레임 폭 32, 카메라 크기 9.5 직렬화 값을 확인했다.
+  - Unity Editor 로그에서 플레이어가 적 공격으로 Armor/HP를 잃고 사망 후 조작이 비활성화된 기록을 확인했다.
+- 원인/수정:
+  - Play Mode 진입 직후 `PlayerDeathHandler.OnEnable`이 `PlayerHealth.Awake` 이전에 `IsDead`(CurrentHealth 0)를 읽어 즉시 사망 처리했고, 모든 플레이어 컴포넌트(PlayerController 등)가 비활성화되어 '조작이 안 된다'가 발생했다. 초기 사망 확인을 `Start`로 옮겨 수정했다.
+- Play Mode 검증 (Unity MCP, 2026-10-11):
+  - Console 에러 0건, 재컴파일 성공. 수정 후 플레이어 컴포넌트가 모두 enabled 상태임을 확인했다.
+  - 스폰된 SLAG(-12)/PAWN(-8)/KNIGHT(7)/ARCHER(8)/BARON(12) 5종과 `TEST: 이름` 라벨, HUD(HP 5/5, Armor 5/5)를 게임 뷰 캡처로 확인했다. Knight(7)와 Archer(8)는 겹쳐 보인다.
+  - 가상 키보드 입력으로 A 이동(x 1.59 → -3.98)과 Space 점프(y 1.42 → 2.20)를 확인했다. D 이동은 x 0 → 1.59로 확인했다.
+  - 시작 시 즉사 없음. Pawn은 4.0 거리에서 제자리 사격(약 2.5초 간격, 투사체 1발 0.75). 플레이어가 4.5 밖에 있는 적은 이동하지 않았다.
+  - Knight는 3.0~3.2 거리에서 7.0 → 5.3까지 접근해 약 1.8초 간격으로 1.25씩 피해를 줬고, 무방비 상태에서 약 7초 만에 사망했다. Archer는 8.0 → 8.3으로 후퇴했다.
+- 제한:
+  - 자동 입력으로 확인하지 못한 것: 대쉬/패링/사격 입력, Slag/Baron 접근·공격(감지 범위 밖에서만 관찰), Archer 사격.
+  - 에디터가 백그라운드일 때는 Play 루프가 멈추고 키 입력이 무시되어 검증 중에만 `Application.runInBackground`와 Input System 백그라운드 설정을 임시 변경했다(프로젝트 파일에는 남기지 않음).
+
+## 2026-10-11 - 적 종류별 이동 AI 및 공격
+
+- 내용: 정지 상태에서 공격만 하던 적에게 접근/거리 유지 이동을 추가하고 README의 다섯 적 종류별 전투 프로필을 구현했다.
+- 기능:
+  - Slag은 천천히 접근해 느린 근접 공격을 하고, Pawn은 느린 비패링 투사체로 공격하며 거리를 유지한다.
+  - Knight는 빠르게 접근하는 패링 가능 근접 적이다. Archer는 거리를 벌리며 빠른 패링 가능 투사체를 발사한다.
+  - Baron은 높은 체력과 빠른 근접전을 갖고, 멀리 떨어진 플레이어에게 패링 가능한 투사체를 발사한 뒤 접근한다.
+  - 적별 체력/이동/공격/투사체 프로필, 색상과 이름표를 추가했다. Baron은 3회 피격 또는 패링 누적 후 경직된다.
+  - 패링 가능 투사체를 패링 또는 회피하면 피해를 받지 않고, 패링 성공 보상도 기존 시스템으로 지급된다.
+- 변경 파일:
+  - `Assets/Scripts/Enemies/BasicEnemyController.cs`
+  - `Assets/Scripts/Enemies/EnemyHealth.cs`
+  - `Assets/Scripts/Enemies/EnemyStagger.cs`
+  - `Assets/Scripts/Enemies/EnemyStatusDebugDisplay.cs`
+  - `Assets/Scripts/Combat/EnemyAttack.cs`
+  - `Assets/Scripts/Player/PlayerParry.cs` (런타임 적 투사체 포함)
+  - `Assets/Prefabs/Enemies/BasicEnemy.prefab`
+  - `README.md`
+- 검증:
+  - Unity C# 프로젝트 빌드 성공, 경고/오류 0건.
+  - `git diff --check` 통과.
+  - 실시간 이동/투사체/패링 Play Mode 검증은 별도 확인이 필요하다.
+- 제한:
+  - 적 공격권 공유/동시 공격 제한은 이번 범위에 포함하지 않았다.
+
 ## 2026-10-11 - 강화 포인트 무기 강화 및 총기 3종
 
 - 내용: 강화 포인트를 현재 장착 무기의 강화에 사용하고 README의 SMG, Shotgun, Railgun 발사 동작을 구현했다. 아래의 10초 임시 강화 변경 전 동작을 기록한다.

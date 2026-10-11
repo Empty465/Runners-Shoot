@@ -15,9 +15,11 @@ public class EnemyStatusDebugDisplay : MonoBehaviour
 
     private static Sprite healthBarSprite;
     private EnemyHealth enemyHealth;
+    private BasicEnemyController enemyController;
     private EnemyStun enemyStun;
     private EnemyStagger enemyStagger;
     private TextMesh statusText;
+    private TextMesh archetypeText;
     private MeshRenderer statusRenderer;
     private SpriteRenderer healthBarFrame;
     private SpriteRenderer healthBarBackground;
@@ -26,10 +28,12 @@ public class EnemyStatusDebugDisplay : MonoBehaviour
     private void Awake()
     {
         enemyHealth = GetComponent<EnemyHealth>();
+        enemyController = GetComponent<BasicEnemyController>();
         enemyStun = GetComponent<EnemyStun>();
         enemyStagger = GetComponent<EnemyStagger>();
-        CreateStatusText();
-        CreateHealthBar();
+        BindOrCreateStatusText();
+        BindOrCreateArchetypeText();
+        BindOrCreateHealthBar();
     }
 
     private void OnEnable()
@@ -98,6 +102,72 @@ public class EnemyStatusDebugDisplay : MonoBehaviour
         statusRenderer.enabled = false;
     }
 
+    private void BindOrCreateStatusText()
+    {
+        Transform statusObject = transform.Find("EnemyStatusDebugText");
+        if (statusObject == null)
+        {
+            CreateStatusText();
+            return;
+        }
+
+        statusText = statusObject.GetComponent<TextMesh>();
+        statusRenderer = statusObject.GetComponent<MeshRenderer>();
+    }
+
+    private void CreateArchetypeText()
+    {
+        if (enemyController == null)
+        {
+            return;
+        }
+
+        GameObject archetypeObject = new GameObject("EnemyArchetypeDebugText");
+        archetypeObject.transform.SetParent(transform, false);
+        archetypeObject.transform.localPosition = localOffset + new Vector3(0f, 0.42f, -0.05f);
+
+        archetypeText = archetypeObject.AddComponent<TextMesh>();
+        archetypeText.text = $"TEST: {enemyController.Archetype.ToString().ToUpperInvariant()}";
+        archetypeText.fontSize = 32;
+        archetypeText.characterSize = 0.1f;
+        archetypeText.anchor = TextAnchor.MiddleCenter;
+        archetypeText.alignment = TextAlignment.Center;
+        archetypeText.fontStyle = FontStyle.Bold;
+        archetypeObject.GetComponent<MeshRenderer>().sortingOrder = 22;
+        RefreshArchetypeLabel();
+    }
+
+    private void BindOrCreateArchetypeText()
+    {
+        Transform archetypeObject = transform.Find("EnemyArchetypeDebugText");
+        if (archetypeObject == null)
+        {
+            CreateArchetypeText();
+            return;
+        }
+
+        archetypeText = archetypeObject.GetComponent<TextMesh>();
+    }
+
+    public void RefreshArchetypeLabel()
+    {
+        if (archetypeText == null || enemyController == null)
+        {
+            return;
+        }
+
+        archetypeText.text = $"TEST: {enemyController.Archetype.ToString().ToUpperInvariant()}";
+        archetypeText.color = enemyController.Archetype switch
+        {
+            EnemyArchetype.Slag => new Color(0.82f, 0.67f, 0.53f),
+            EnemyArchetype.Pawn => new Color(0.52f, 0.8f, 1f),
+            EnemyArchetype.Knight => new Color(1f, 0.72f, 0.39f),
+            EnemyArchetype.Archer => new Color(0.4f, 1f, 0.82f),
+            EnemyArchetype.Baron => new Color(1f, 0.4f, 0.38f),
+            _ => Color.white
+        };
+    }
+
     private void CreateHealthBar()
     {
         if (healthBarSprite == null)
@@ -118,6 +188,29 @@ public class EnemyStatusDebugDisplay : MonoBehaviour
         healthBarFrame = CreateBarLayer(barRoot, "Frame", healthBarFrameColor, 18, 1.12f);
         healthBarBackground = CreateBarLayer(barRoot, "Background", new Color(0.035f, 0.055f, 0.09f), 19, 1f);
         healthBarFill = CreateBarLayer(barRoot, "Fill", healthColor, 20, 0.68f);
+    }
+
+    private void BindOrCreateHealthBar()
+    {
+        Transform barRoot = transform.Find("EnemyHealthBar");
+        if (barRoot == null)
+        {
+            CreateHealthBar();
+            return;
+        }
+
+        Transform frame = barRoot.Find("Frame");
+        Transform background = barRoot.Find("Background");
+        Transform fill = barRoot.Find("Fill");
+        if (frame == null || background == null || fill == null)
+        {
+            CreateHealthBar();
+            return;
+        }
+
+        healthBarFrame = frame.GetComponent<SpriteRenderer>();
+        healthBarBackground = background.GetComponent<SpriteRenderer>();
+        healthBarFill = fill.GetComponent<SpriteRenderer>();
     }
 
     private static SpriteRenderer CreateBarLayer(

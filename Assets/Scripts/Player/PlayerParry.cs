@@ -112,12 +112,33 @@ public class PlayerParry : MonoBehaviour
         }
 
         EnemyStun enemyStun = enemyAttack.GetComponent<EnemyStun>();
-        if (enemyStun != null)
+        BasicEnemyController enemyController = enemyAttack.GetComponent<BasicEnemyController>();
+        if (enemyController != null)
+        {
+            enemyController.RegisterParryStagger();
+        }
+        else if (enemyStun != null)
         {
             enemyStun.Stun();
         }
 
         enemyAttack.CancelCurrentAttack();
+        RegisterParrySuccess();
+    }
+
+    public bool TryParryProjectile(EnemyProjectile projectile)
+    {
+        if (!IsParryActive || projectile == null || !projectile.TryRegisterParry())
+        {
+            return false;
+        }
+
+        RegisterParrySuccess();
+        return true;
+    }
+
+    private void RegisterParrySuccess()
+    {
         enhancementPoints.AddPoints(enhancementPointsPerParry);
         ParrySucceeded?.Invoke();
         ShowParrySuccess();
@@ -181,5 +202,87 @@ public class PlayerParry : MonoBehaviour
         {
             parrySuccessDebugVisual.SetActive(false);
         }
+    }
+}
+
+public class EnemyProjectile : MonoBehaviour
+{
+    private Vector2 direction;
+    private float speed;
+    private float damage;
+    private float remainingLifetime;
+    private Transform owner;
+    private bool parryable;
+    private bool parryProcessed;
+
+    public void Initialize(
+        Vector2 projectileDirection,
+        float projectileSpeed,
+        float projectileDamage,
+        bool canBeParried,
+        Transform projectileOwner,
+        float lifetime = 4f)
+    {
+        direction = projectileDirection.normalized;
+        speed = Mathf.Max(0f, projectileSpeed);
+        damage = Mathf.Max(0f, projectileDamage);
+        parryable = canBeParried;
+        owner = projectileOwner;
+        remainingLifetime = Mathf.Max(0.1f, lifetime);
+    }
+
+    public bool TryRegisterParry()
+    {
+        if (!parryable || parryProcessed)
+        {
+            return false;
+        }
+
+        parryProcessed = true;
+        BasicEnemyController enemyController = owner != null
+            ? owner.GetComponent<BasicEnemyController>()
+            : null;
+        enemyController?.RegisterParryStagger();
+        Destroy(gameObject);
+        return true;
+    }
+
+    private void Update()
+    {
+        transform.position += (Vector3)(direction * speed * Time.deltaTime);
+        remainingLifetime -= Time.deltaTime;
+        if (remainingLifetime <= 0f)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (owner != null && (other.transform == owner || other.transform.IsChildOf(owner)))
+        {
+            return;
+        }
+
+        PlayerParry playerParry = other.GetComponentInParent<PlayerParry>();
+        if (playerParry != null && playerParry.TryParryProjectile(this))
+        {
+            return;
+        }
+
+        PlayerDodge playerDodge = other.GetComponentInParent<PlayerDodge>();
+        if (playerDodge != null && playerDodge.TryRegisterSuccess())
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(damage);
+        }
+
+        Destroy(gameObject);
     }
 }

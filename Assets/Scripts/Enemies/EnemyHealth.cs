@@ -17,6 +17,18 @@ public class EnemyHealth : MonoBehaviour
         CurrentHealth = maxHealth;
     }
 
+    public void ConfigureMaxHealth(float health)
+    {
+        if (IsDead)
+        {
+            return;
+        }
+
+        maxHealth = Mathf.Max(1f, health);
+        CurrentHealth = maxHealth;
+        HealthChanged?.Invoke(CurrentHealth);
+    }
+
     public void TakeDamage(float damage)
     {
         if (IsDead || damage <= 0f)

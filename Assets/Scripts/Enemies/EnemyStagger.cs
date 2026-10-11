@@ -4,10 +4,12 @@ using UnityEngine;
 public class EnemyStagger : MonoBehaviour
 {
     [SerializeField] private float staggerDuration = 0.25f;
+    [SerializeField, Min(1)] private int damageHitsPerStagger = 1;
 
     private EnemyHealth enemyHealth;
     private EnemyStun enemyStun;
     private Coroutine staggerRoutine;
+    private int damageHitsReceived;
 
     public bool IsStaggered { get; private set; }
 
@@ -42,7 +44,18 @@ public class EnemyStagger : MonoBehaviour
             return;
         }
 
-        Stagger();
+        damageHitsReceived++;
+        if (damageHitsReceived >= damageHitsPerStagger)
+        {
+            damageHitsReceived = 0;
+            Stagger();
+        }
+    }
+
+    public void ConfigureDamageHitsPerStagger(int hitCount)
+    {
+        damageHitsPerStagger = Mathf.Max(1, hitCount);
+        damageHitsReceived = 0;
     }
 
     public void Stagger()
@@ -97,5 +110,6 @@ public class EnemyStagger : MonoBehaviour
         }
 
         IsStaggered = false;
+        damageHitsReceived = 0;
     }
 }
