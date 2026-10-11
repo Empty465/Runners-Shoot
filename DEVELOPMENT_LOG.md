@@ -592,3 +592,26 @@
   - `Assets/Prefabs/Enemies/`
   - 기타 Art, Audio, Materials, Tilemaps, UI 폴더
 - 보호 대상: 기존 `SampleScene`은 수정하지 않았다.
+
+## 2026-10-11 - 패링/회피 성공 전투 이펙트
+
+- 내용: 패링과 회피 성공 순간을 더 선명하게 읽을 수 있도록 플레이어 주변에 런타임 전투 이펙트를 추가했다.
+- 기능:
+  - 패링 성공 시 청록색 충격 링, 검격 아크, 방사형 스파크 표시
+  - 회피 성공 시 방향을 따라가는 금색 충격 링과 잔상 표시
+  - 기존 판정, 이동, 보상 흐름은 변경하지 않고 성공 지점에 시각 효과만 연결
+  - 이펙트 종료 및 Player 비활성화 시 런타임 오브젝트와 머티리얼 정리
+- 변경 파일:
+  - `Assets/Scripts/Player/PlayerCombatFeedbackVFX.cs`
+  - `Assets/Scripts/Player/PlayerCombatFeedbackVFX.cs.meta`
+  - `Assets/Scripts/Player/PlayerParry.cs`
+  - `Assets/Scripts/Player/PlayerDodge.cs`
+  - `DEVELOPMENT_LOG.md`
+- 검증 결과:
+  - Unity MCP Recompile 완료, `compilationFailed=false` 및 컴파일 오류 0건을 확인했다.
+  - TestArena Play Mode에서 패링/회피 이펙트 메서드를 각각 실행해 Game View 렌더링을 확인했고, 테스트 후 Play Mode를 종료했다.
+  - 테스트 중 신규 컴파일/런타임 오류는 발생하지 않았다.
+- 제한 사항:
+  - 입력 장치 대신 Unity MCP에서 이펙트 메서드를 직접 호출해 시각 표시를 검증했다. 실제 패링/회피 성공 입력 경로는 Editor에서 별도 확인이 필요하다.
+- 다음 작업:
+  - TestArena에서 실제 패링/회피 성공 입력 경로와 보상 흐름을 확인한다.

@@ -19,6 +19,7 @@ public class PlayerParry : MonoBehaviour
     private Coroutine parryRoutine;
     private Coroutine successVisualRoutine;
     private PlayerEnhancementPoints enhancementPoints;
+    private PlayerCombatFeedbackVFX combatFeedbackVFX;
     private float nextParryTime;
 
     public bool IsParryActive { get; private set; }
@@ -30,6 +31,12 @@ public class PlayerParry : MonoBehaviour
         if (enhancementPoints == null)
         {
             enhancementPoints = gameObject.AddComponent<PlayerEnhancementPoints>();
+        }
+
+        combatFeedbackVFX = GetComponent<PlayerCombatFeedbackVFX>();
+        if (combatFeedbackVFX == null)
+        {
+            combatFeedbackVFX = gameObject.AddComponent<PlayerCombatFeedbackVFX>();
         }
 
         if (parryHitbox == null)
@@ -112,6 +119,7 @@ public class PlayerParry : MonoBehaviour
         enhancementPoints.AddPoints(enhancementPointsPerParry);
         ParrySucceeded?.Invoke();
         ShowParrySuccess();
+        combatFeedbackVFX.PlayParrySuccess();
         Debug.Log("[Parry] SUCCESS");
     }
 

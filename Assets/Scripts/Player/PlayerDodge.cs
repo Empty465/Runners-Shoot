@@ -19,6 +19,7 @@ public class PlayerDodge : MonoBehaviour
     private InputAction dodgeAction;
     private Camera playerCamera;
     private PlayerEnhancementPoints enhancementPoints;
+    private PlayerCombatFeedbackVFX combatFeedbackVFX;
     private float nextDodgeTime;
     private float dodgeUntil;
     private int dodgeDirection;
@@ -35,6 +36,12 @@ public class PlayerDodge : MonoBehaviour
         if (enhancementPoints == null)
         {
             enhancementPoints = gameObject.AddComponent<PlayerEnhancementPoints>();
+        }
+
+        combatFeedbackVFX = GetComponent<PlayerCombatFeedbackVFX>();
+        if (combatFeedbackVFX == null)
+        {
+            combatFeedbackVFX = gameObject.AddComponent<PlayerCombatFeedbackVFX>();
         }
 
         InputActionMap playerActions = playerInput.actions.FindActionMap("Player", true);
@@ -113,6 +120,7 @@ public class PlayerDodge : MonoBehaviour
         }
 
         DodgeSucceeded?.Invoke();
+        combatFeedbackVFX.PlayDodgeSuccess(dodgeDirection);
         return true;
     }
 
