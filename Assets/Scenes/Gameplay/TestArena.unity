@@ -1489,6 +1489,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9524e6ee26047724aaf0b7ae784b3cd9, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDeath
+  deathPresentationDuration: 0.4
+  deathFallAngle: 78
+  deathShrinkAmount: 0.82
+  deathDropDistance: 0.35
 --- !u!114 &915831445
 MonoBehaviour:
   m_ObjectHideFlags: 0
