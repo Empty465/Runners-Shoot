@@ -19,7 +19,9 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private Image armorFill;
     private Text healthValueText;
     private Text armorValueText;
+    private Text weaponAmmoTitleText;
     private Text ammoValueText;
+    private Text weaponUpgradeHintText;
     private Text pointsValueText;
     private Text dodgeStatusText;
     private Text parryStatusText;
@@ -54,6 +56,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         CreateStatusText();
         SubscribeToHealthChanges();
         SubscribeToAmmoChanges();
+        SubscribeToEnhancementPointChanges();
         SubscribeToCombatFeedback();
         UpdateStatusText();
     }
@@ -219,12 +222,33 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     {
         if (playerWeapon != null)
         {
+            playerWeapon.AmmoChanged -= OnAmmoChanged;
             playerWeapon.AmmoChanged += OnAmmoChanged;
+            playerWeapon.WeaponChanged -= OnWeaponChanged;
+            playerWeapon.WeaponChanged += OnWeaponChanged;
+            playerWeapon.WeaponUpgradeChanged -= OnWeaponUpgradeChanged;
+            playerWeapon.WeaponUpgradeChanged += OnWeaponUpgradeChanged;
         }
     }
 
     private void OnAmmoChanged(int currentAmmo)
     {
+        UpdateStatusText();
+    }
+
+    private void OnWeaponChanged(PlayerWeaponType weaponType)
+    {
+        UpdateStatusText();
+    }
+
+    private void OnWeaponUpgradeChanged(PlayerWeaponType weaponType, int level)
+    {
+        if (level > 0)
+        {
+            ShowCombatFeedback($"{weaponType.ToString().ToUpperInvariant()} ENHANCED",
+                new Color(1f, 0.78f, 0.28f));
+        }
+
         UpdateStatusText();
     }
 
@@ -319,6 +343,23 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
                 : textColor;
         }
 
+        if (weaponAmmoTitleText != null && playerWeapon != null)
+        {
+            weaponAmmoTitleText.text = $"{playerWeapon.CurrentWeaponName} AMMO";
+        }
+
+        if (weaponUpgradeHintText != null && playerWeapon != null)
+        {
+            bool upgradeReady = enhancementPoints != null &&
+                enhancementPoints.CurrentPoints >= playerWeapon.UpgradeCost;
+            weaponUpgradeHintText.text = playerWeapon.CurrentUpgradeLevel > 0
+                ? $"ENHANCED  {playerWeapon.CurrentUpgradeRemaining:0.0}s"
+                : $"R ENHANCE  {playerWeapon.UpgradeDuration:0.#}s";
+            weaponUpgradeHintText.color = playerWeapon.CurrentUpgradeLevel > 0 || upgradeReady
+                ? new Color(1f, 0.78f, 0.28f)
+                : new Color(0.55f, 0.61f, 0.7f);
+        }
+
         if (pointsValueText != null && enhancementPoints != null)
         {
             pointsValueText.text = enhancementPoints.CurrentPoints.ToString();
@@ -355,6 +396,8 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         if (playerWeapon != null)
         {
             playerWeapon.AmmoChanged -= OnAmmoChanged;
+            playerWeapon.WeaponChanged -= OnWeaponChanged;
+            playerWeapon.WeaponUpgradeChanged -= OnWeaponUpgradeChanged;
         }
 
         if (enhancementPoints != null)
@@ -491,12 +534,16 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             new Vector2(1f, 0f),
             new Vector2(-screenOffset.x, screenOffset.y),
             new Vector2(300f, 112f));
-        CreateLabel(resourcesPanel.transform, "AmmoTitle", "AMMO", 13, new Color(0.62f, 0.72f, 0.84f),
+        weaponAmmoTitleText = CreateLabel(resourcesPanel.transform, "AmmoTitle", "SMG AMMO", 13,
+            new Color(0.62f, 0.72f, 0.84f),
             Vector2.zero, Vector2.zero, new Vector2(18f, 80f),
             new Vector2(110f, 20f), TextAnchor.MiddleLeft);
         ammoValueText = CreateLabel(resourcesPanel.transform, "AmmoValue", string.Empty, fontSize, textColor,
             Vector2.zero, Vector2.zero, new Vector2(18f, 36f),
             new Vector2(130f, 40f), TextAnchor.MiddleLeft);
+        weaponUpgradeHintText = CreateLabel(resourcesPanel.transform, "WeaponUpgradeHint", "R UPGRADE",
+            12, new Color(0.55f, 0.61f, 0.7f), Vector2.zero, Vector2.zero,
+            new Vector2(18f, 7f), new Vector2(136f, 20f), TextAnchor.MiddleLeft);
         CreateImage(resourcesPanel.transform, "Divider", new Color(0.36f, 0.43f, 0.53f, 0.8f),
             Vector2.zero, Vector2.zero, new Vector2(154f, 17f), new Vector2(1f, 76f));
         CreateLabel(resourcesPanel.transform, "PointsTitle", "POINTS", 13, new Color(0.62f, 0.72f, 0.84f),

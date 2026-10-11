@@ -1435,6 +1435,9 @@ MonoBehaviour:
   muzzleOffset: 0.6
   projectileSize: 0.16
   projectileColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  shotgunProjectileSpeed: 16
+  shotgunProjectileLifetime: 3
+  shotgunSpreadDegrees: 26
   upgradeCost: 1
   damageUpgradeAmount: 0.5
   speedUpgradeAmount: 1.5
