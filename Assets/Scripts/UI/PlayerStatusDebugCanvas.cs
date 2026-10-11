@@ -22,6 +22,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private Text parryStatusText;
     private Text feedbackText;
     private float feedbackUntil;
+    private Image damageFlashOverlay;
+    private float damageFlashRemaining;
+    private float previousHealth;
+    private float previousArmor;
+
+    private const float DamageFlashDuration = 0.38f;
 
     private void Awake()
     {
@@ -31,6 +37,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         playerParry = FindPlayerComponent<PlayerParry>();
         playerDodge = FindPlayerComponent<PlayerDodge>();
         CreateStatusText();
+        if (playerHealth != null)
+        {
+            previousHealth = playerHealth.CurrentHealth;
+            previousArmor = playerHealth.CurrentArmor;
+        }
+
         SubscribeToHealthChanges();
         SubscribeToAmmoChanges();
         SubscribeToCombatFeedback();
@@ -42,6 +54,12 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         if (playerHealth == null)
         {
             playerHealth = FindPlayerComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                previousHealth = playerHealth.CurrentHealth;
+                previousArmor = playerHealth.CurrentArmor;
+            }
+
             SubscribeToHealthChanges();
         }
 
@@ -74,6 +92,14 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             feedbackText.text = string.Empty;
         }
 
+        if (damageFlashOverlay != null && damageFlashRemaining > 0f)
+        {
+            damageFlashRemaining = Mathf.Max(0f, damageFlashRemaining - Time.unscaledDeltaTime);
+            Color flashColor = damageFlashOverlay.color;
+            flashColor.a = 0.24f * (damageFlashRemaining / DamageFlashDuration);
+            damageFlashOverlay.color = flashColor;
+        }
+
         UpdateStatusText();
     }
 
@@ -90,12 +116,36 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
     private void OnHealthChanged(float currentHealth)
     {
+        if (currentHealth < previousHealth)
+        {
+            ShowDamageFlash(new Color(1f, 0.16f, 0.2f, 1f));
+        }
+
+        previousHealth = currentHealth;
         UpdateStatusText();
     }
 
     private void OnArmorChanged(float currentArmor)
     {
+        if (currentArmor < previousArmor)
+        {
+            ShowDamageFlash(new Color(1f, 0.55f, 0.16f, 1f));
+        }
+
+        previousArmor = currentArmor;
         UpdateStatusText();
+    }
+
+    private void ShowDamageFlash(Color color)
+    {
+        if (damageFlashOverlay == null)
+        {
+            return;
+        }
+
+        color.a = 0.24f;
+        damageFlashOverlay.color = color;
+        damageFlashRemaining = DamageFlashDuration;
     }
 
     private void SubscribeToAmmoChanges()
@@ -228,13 +278,11 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
     private void OnDisable()
     {
-        if (playerHealth == null)
+        if (playerHealth != null)
         {
-            return;
+            playerHealth.HealthChanged -= OnHealthChanged;
+            playerHealth.ArmorChanged -= OnArmorChanged;
         }
-
-        playerHealth.HealthChanged -= OnHealthChanged;
-        playerHealth.ArmorChanged -= OnArmorChanged;
 
         if (playerWeapon != null)
         {
@@ -254,6 +302,14 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         if (playerDodge != null)
         {
             playerDodge.DodgeSucceeded -= OnDodgeSucceeded;
+        }
+
+        damageFlashRemaining = 0f;
+        if (damageFlashOverlay != null)
+        {
+            Color flashColor = damageFlashOverlay.color;
+            flashColor.a = 0f;
+            damageFlashOverlay.color = flashColor;
         }
     }
 
@@ -285,6 +341,17 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         scaler.referenceResolution = new Vector2(1280f, 720f);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
+        damageFlashOverlay = CreateImage(
+            canvasObject.transform,
+            "DamageFlashOverlay",
+            new Color(1f, 0.16f, 0.2f, 0f),
+            Vector2.zero,
+            Vector2.one,
+            Vector2.zero,
+            Vector2.zero);
+        damageFlashOverlay.rectTransform.offsetMin = Vector2.zero;
+        damageFlashOverlay.rectTransform.offsetMax = Vector2.zero;
+        damageFlashOverlay.raycastTarget = false;
 
         GameObject vitalsPanel = CreatePanel(
             canvasObject.transform,
