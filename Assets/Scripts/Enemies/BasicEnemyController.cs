@@ -81,11 +81,11 @@ public class BasicEnemyController : MonoBehaviour
         }
     }
 
-    // Hand-placed enemies (more than one controller under the parent) keep their own inspector values.
+    // Hand-placed enemies anywhere in the scene (more than one controller) keep their own inspector values.
     private bool IsOnlyEnemyInGroup()
     {
         return archetype == EnemyArchetype.Knight && transform.parent != null &&
-               transform.parent.GetComponentsInChildren<BasicEnemyController>(true).Length == 1;
+               FindObjectsByType<BasicEnemyController>(FindObjectsInactive.Include).Length == 1;
     }
 
     private void SpawnTestArenaArchetypes()

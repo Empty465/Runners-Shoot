@@ -10,7 +10,8 @@
 - 검증(Unity MCP): 재컴파일 성공, 5개 프리팹의 archetype 값 확인, Play Mode에서 Archer/Slag 프리팹을 `Enemies` 아래 인스턴스화해 종류와 감지 범위 10 유지 확인, 새 콘솔 에러 없음.
 - 수정(색/체력 없음): 원인은 기본 `BasicEnemy` 프리팹에 `EnemyHealth`/`EnemyDeath`/`EnemyStagger`/`EnemyStatusDebugDisplay`가 없고 씬 인스턴스에만 추가돼 있던 것. 이 4개를 기본 프리팹에 적용해 5개 변형이 상속하도록 했다. 재확인(Play Mode, Baron 프리팹 인스턴스화): 체력 5, 체력바·라벨(`TEST: BARON (PARRY OK)`) 생성, 색 (0.85,0.2,0.24) 적용.
 - 수정(배치하자마자 죽음): 씬에 직접 배치한 `Enemy_Knight`가 Play 시작 때 `EnemyDeath.dead=True`(체력은 5)로 확인됐다. 원인은 `EnemyDeath.OnEnable`이 `EnemyHealth.Awake`보다 먼저 실행되어 `CurrentHealth`가 0으로 읽히던 초기화 순서 문제. `EnemyHealth`가 처음 읽을 때 지연 초기화하도록 수정했다. 재확인(Play Mode): 직접 배치한 `Enemy_Knight`를 포함한 모든 적이 dead=False, 체력 정상.
-- 미검증: 각 프리팹을 직접 배치했을 때의 전투 동작, 직접 배치 시 자동 스폰이 꺼지는지.
+- 수정(수동 배치 시 자동 스폰이 안 꺼짐): 기존 판정이 `Enemies` 부모 아래 개수만 세서 루트 등 다른 곳에 배치한 적을 무시했다. 씬 전체의 `BasicEnemyController`가 1개일 때만 자동 스폰하도록 변경. 재확인(Play Mode): 루트에 배치한 `Enemy_Knight`/`Enemy_Baron`이 있을 때 `Test_*` 자동 스폰이 생기지 않음.
+- 미검증: 각 프리팹을 직접 배치했을 때의 전투 동작.
 
 ## 2026-10-11 - 패링 체감 개선
 
