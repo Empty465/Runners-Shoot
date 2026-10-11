@@ -8,6 +8,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     [SerializeField] private Color textColor = Color.white;
     [SerializeField] private float damageShakeDuration = 0.16f;
     [SerializeField] private float damageShakeStrength = 0.08f;
+    [SerializeField, Range(0.05f, 0.5f)] private float criticalHealthThreshold = 0.2f;
 
     private PlayerHealth playerHealth;
     private PlayerWeapon playerWeapon;
@@ -30,6 +31,9 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private Vector3 damageShakeOrigin;
     private float damageShakeRemaining;
     private float activeDamageShakeDuration;
+    private GameObject criticalHealthPanel;
+    private Image criticalHealthBackground;
+    private Text criticalHealthText;
 
     private const float DamageFlashDuration = 0.38f;
 
@@ -100,6 +104,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         }
 
         UpdateDamageShake();
+        UpdateCriticalHealthWarning();
         UpdateStatusText();
     }
 
@@ -178,6 +183,36 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             Mathf.Sin(Time.unscaledTime * 61f),
             Mathf.Cos(Time.unscaledTime * 47f)).normalized * (damageShakeStrength * intensity);
         damageShakeCamera.localPosition = damageShakeOrigin + new Vector3(offset.x, offset.y, 0f);
+    }
+
+    private void UpdateCriticalHealthWarning()
+    {
+        if (criticalHealthPanel == null || playerHealth == null)
+        {
+            return;
+        }
+
+        bool isCritical = !playerHealth.IsDead &&
+            playerHealth.CurrentHealth / playerHealth.MaxHealth <= criticalHealthThreshold;
+        if (criticalHealthPanel.activeSelf != isCritical)
+        {
+            criticalHealthPanel.SetActive(isCritical);
+        }
+
+        if (!isCritical)
+        {
+            return;
+        }
+
+        float pulse = (Mathf.Sin(Time.unscaledTime * 6f) + 1f) * 0.5f;
+        Color backgroundColor = criticalHealthBackground.color;
+        backgroundColor.a = Mathf.Lerp(0.16f, 0.38f, pulse);
+        criticalHealthBackground.color = backgroundColor;
+        criticalHealthText.color = Color.Lerp(
+            new Color(1f, 0.62f, 0.62f),
+            Color.white,
+            pulse);
+        criticalHealthPanel.transform.localScale = Vector3.one * Mathf.Lerp(1f, 1.04f, pulse);
     }
 
     private void SubscribeToAmmoChanges()
@@ -392,6 +427,32 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         damageFlashOverlay.rectTransform.offsetMin = Vector2.zero;
         damageFlashOverlay.rectTransform.offsetMax = Vector2.zero;
         damageFlashOverlay.raycastTarget = false;
+
+        criticalHealthPanel = CreatePanel(
+            canvasObject.transform,
+            "CriticalHealthWarning",
+            new Vector2(0.5f, 1f),
+            new Vector2(0.5f, 1f),
+            new Vector2(0.5f, 1f),
+            new Vector2(0f, -screenOffset.y),
+            new Vector2(300f, 44f));
+        criticalHealthPanel.SetActive(false);
+        criticalHealthBackground = criticalHealthPanel.GetComponent<Image>();
+        criticalHealthBackground.color = new Color(0.55f, 0.035f, 0.055f, 0.24f);
+        criticalHealthBackground.raycastTarget = false;
+        criticalHealthText = CreateLabel(
+            criticalHealthPanel.transform,
+            "CriticalHealthText",
+            "CRITICAL HEALTH",
+            18,
+            Color.white,
+            Vector2.zero,
+            Vector2.one,
+            Vector2.zero,
+            Vector2.zero,
+            TextAnchor.MiddleCenter);
+        criticalHealthText.fontStyle = FontStyle.Bold;
+        criticalHealthText.raycastTarget = false;
 
         GameObject vitalsPanel = CreatePanel(
             canvasObject.transform,
