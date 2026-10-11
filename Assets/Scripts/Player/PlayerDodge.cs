@@ -26,6 +26,8 @@ public class PlayerDodge : MonoBehaviour
     private bool successRegistered;
 
     public bool IsDodging => Time.time < dodgeUntil;
+    public bool CanDodge => !IsDodging && Time.time >= nextDodgeTime;
+    public float DodgeCooldownRemaining => Mathf.Max(0f, nextDodgeTime - Time.time);
     public event Action DodgeSucceeded;
 
     private void Awake()
@@ -84,7 +86,7 @@ public class PlayerDodge : MonoBehaviour
 
     private void TryDodge()
     {
-        if (Time.time < nextDodgeTime || IsDodging)
+        if (!CanDodge)
         {
             return;
         }

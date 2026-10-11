@@ -17,12 +17,24 @@ public class EnemyAttack : MonoBehaviour
     [SerializeField] private GameObject windupIndicator;
     [SerializeField] private float hitboxHorizontalOffset = 1.3f;
 
+    [Header("Attack Visuals")]
+    [SerializeField] private Transform enemyVisual;
+    [SerializeField] private float windupPulseSpeed = 14f;
+
     private BasicEnemyController enemyController;
     private EnemyStun enemyStun;
     private EnemyStagger enemyStagger;
     private Collider2D attackHitboxCollider;
+    private MeshRenderer windupIndicatorRenderer;
+    private MaterialPropertyBlock windupMaterialBlock;
     private Coroutine attackRoutine;
     private float nextAttackTime;
+    private float windupStartedAt;
+    private Vector3 initialWindupIndicatorScale;
+    private Vector3 initialEnemyVisualScale;
+    private Quaternion initialEnemyVisualRotation;
+    private Color initialWindupColor = Color.white;
+    private bool hasWindupColor;
     private bool parryProcessed;
 
     public event Action<Collider2D> AttackHit;
@@ -59,6 +71,31 @@ public class EnemyAttack : MonoBehaviour
             windupIndicator = indicatorTransform != null ? indicatorTransform.gameObject : null;
         }
 
+        if (windupIndicator != null)
+        {
+            initialWindupIndicatorScale = windupIndicator.transform.localScale;
+            windupIndicatorRenderer = windupIndicator.GetComponent<MeshRenderer>();
+            if (windupIndicatorRenderer != null && windupIndicatorRenderer.sharedMaterial != null &&
+                windupIndicatorRenderer.sharedMaterial.HasProperty("_White"))
+            {
+                initialWindupColor = windupIndicatorRenderer.sharedMaterial.GetColor("_White");
+                windupMaterialBlock = new MaterialPropertyBlock();
+                hasWindupColor = true;
+            }
+        }
+
+        if (enemyVisual == null)
+        {
+            Transform visualTransform = transform.Find("EnemyDebugVisual");
+            enemyVisual = visualTransform != null ? visualTransform : null;
+        }
+
+        if (enemyVisual != null)
+        {
+            initialEnemyVisualScale = enemyVisual.localScale;
+            initialEnemyVisualRotation = enemyVisual.localRotation;
+        }
+
         if (attackHitbox != null)
         {
             attackHitboxCollider = attackHitbox.GetComponent<Collider2D>();
@@ -73,6 +110,8 @@ public class EnemyAttack : MonoBehaviour
 
     private void Update()
     {
+        UpdateAttackVisuals();
+
         if (playerTarget == null)
         {
             GameObject player = GameObject.Find("Player");
@@ -108,6 +147,7 @@ public class EnemyAttack : MonoBehaviour
         nextAttackTime = Time.time + attackCooldown;
         parryProcessed = false;
         IsWindupActive = true;
+        windupStartedAt = Time.time;
         if (windupIndicator != null)
         {
             windupIndicator.SetActive(true);
@@ -119,6 +159,7 @@ public class EnemyAttack : MonoBehaviour
         if (windupIndicator != null)
         {
             windupIndicator.SetActive(false);
+            ResetAttackVisuals();
         }
 
         PositionAttackHitbox();
@@ -169,8 +210,86 @@ public class EnemyAttack : MonoBehaviour
             windupIndicator.SetActive(false);
         }
 
+        ResetAttackVisuals();
         nextAttackTime = Time.time + attackCooldown;
         Debug.Log("[Enemy] Attack Cancelled");
+    }
+
+    private void UpdateAttackVisuals()
+    {
+        if (IsWindupActive)
+        {
+            float pulse = (Mathf.Sin(Time.time * windupPulseSpeed) + 1f) * 0.5f;
+            if (windupIndicator != null)
+            {
+                Transform indicatorTransform = windupIndicator.transform;
+                indicatorTransform.localScale = new Vector3(
+                    initialWindupIndicatorScale.x * Mathf.Lerp(0.8f, 1.2f, pulse),
+                    initialWindupIndicatorScale.y * Mathf.Lerp(0.75f, 1.6f, pulse),
+                    initialWindupIndicatorScale.z);
+            }
+
+            if (hasWindupColor && windupIndicatorRenderer != null)
+            {
+                float progress = attackWindup > 0f
+                    ? Mathf.Clamp01((Time.time - windupStartedAt) / attackWindup)
+                    : 1f;
+                Color telegraphColor = Color.Lerp(new Color(1f, 0.58f, 0.14f), new Color(1f, 0.12f, 0.08f), progress);
+                telegraphColor = Color.Lerp(telegraphColor, Color.white, pulse * 0.28f);
+                windupIndicatorRenderer.GetPropertyBlock(windupMaterialBlock);
+                windupMaterialBlock.SetColor("_White", telegraphColor);
+                windupIndicatorRenderer.SetPropertyBlock(windupMaterialBlock);
+            }
+
+            if (enemyVisual != null)
+            {
+                enemyVisual.localScale = new Vector3(
+                    enemyVisual.localScale.x,
+                    initialEnemyVisualScale.y * Mathf.Lerp(1f, 0.9f, pulse),
+                    initialEnemyVisualScale.z);
+                int facingDirection = enemyController != null ? enemyController.FacingDirection : -1;
+                enemyVisual.localRotation = initialEnemyVisualRotation *
+                    Quaternion.Euler(0f, 0f, -8f * facingDirection * pulse);
+            }
+        }
+        else if (IsAttackActive && enemyVisual != null)
+        {
+            int facingDirection = enemyController != null ? enemyController.FacingDirection : -1;
+            enemyVisual.localScale = new Vector3(
+                enemyVisual.localScale.x,
+                initialEnemyVisualScale.y * 1.08f,
+                initialEnemyVisualScale.z);
+            enemyVisual.localRotation = initialEnemyVisualRotation *
+                Quaternion.Euler(0f, 0f, 9f * facingDirection);
+        }
+        else
+        {
+            ResetAttackVisuals();
+        }
+    }
+
+    private void ResetAttackVisuals()
+    {
+        if (windupIndicator != null)
+        {
+            windupIndicator.transform.localScale = initialWindupIndicatorScale;
+        }
+
+        if (hasWindupColor && windupIndicatorRenderer != null)
+        {
+            windupIndicatorRenderer.GetPropertyBlock(windupMaterialBlock);
+            windupMaterialBlock.SetColor("_White", initialWindupColor);
+            windupIndicatorRenderer.SetPropertyBlock(windupMaterialBlock);
+        }
+
+        if (enemyVisual != null)
+        {
+            enemyVisual.localScale = new Vector3(
+                enemyVisual.localScale.x,
+                initialEnemyVisualScale.y,
+                initialEnemyVisualScale.z);
+            enemyVisual.localRotation = initialEnemyVisualRotation;
+        }
     }
 
     private void PositionAttackHitbox()
@@ -233,5 +352,7 @@ public class EnemyAttack : MonoBehaviour
         {
             windupIndicator.SetActive(false);
         }
+
+        ResetAttackVisuals();
     }
 }

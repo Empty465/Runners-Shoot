@@ -23,6 +23,8 @@ public class PlayerParry : MonoBehaviour
     private float nextParryTime;
 
     public bool IsParryActive { get; private set; }
+    public bool CanParry => parryRoutine == null && Time.time >= nextParryTime;
+    public float ParryCooldownRemaining => Mathf.Max(0f, nextParryTime - Time.time);
     public event Action ParrySucceeded;
 
     private void Awake()
@@ -74,7 +76,7 @@ public class PlayerParry : MonoBehaviour
 
     private void TryStartParry()
     {
-        if (parryRoutine != null || Time.time < nextParryTime)
+        if (!CanParry)
         {
             return;
         }

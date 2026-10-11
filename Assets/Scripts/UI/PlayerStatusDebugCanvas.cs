@@ -18,6 +18,8 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private Text armorValueText;
     private Text ammoValueText;
     private Text pointsValueText;
+    private Text dodgeStatusText;
+    private Text parryStatusText;
     private Text feedbackText;
     private float feedbackUntil;
 
@@ -72,10 +74,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             feedbackText.text = string.Empty;
         }
 
-        if (playerHealth != null)
-        {
-            UpdateStatusText();
-        }
+        UpdateStatusText();
     }
 
     private void SubscribeToHealthChanges()
@@ -165,36 +164,34 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
     private void UpdateStatusText()
     {
-        if (playerHealth == null)
+        if (playerHealth != null)
         {
-            return;
-        }
+            float healthRatio = playerHealth.MaxHealth > 0f
+                ? Mathf.Clamp01(playerHealth.CurrentHealth / playerHealth.MaxHealth)
+                : 0f;
+            float armorRatio = playerHealth.MaxArmor > 0f
+                ? Mathf.Clamp01(playerHealth.CurrentArmor / playerHealth.MaxArmor)
+                : 0f;
 
-        float healthRatio = playerHealth.MaxHealth > 0f
-            ? Mathf.Clamp01(playerHealth.CurrentHealth / playerHealth.MaxHealth)
-            : 0f;
-        float armorRatio = playerHealth.MaxArmor > 0f
-            ? Mathf.Clamp01(playerHealth.CurrentArmor / playerHealth.MaxArmor)
-            : 0f;
+            if (healthFill != null)
+            {
+                SetFillAmount(healthFill, healthRatio);
+            }
 
-        if (healthFill != null)
-        {
-            SetFillAmount(healthFill, healthRatio);
-        }
+            if (armorFill != null)
+            {
+                SetFillAmount(armorFill, armorRatio);
+            }
 
-        if (armorFill != null)
-        {
-            SetFillAmount(armorFill, armorRatio);
-        }
+            if (healthValueText != null)
+            {
+                healthValueText.text = $"{playerHealth.CurrentHealth:0} / {playerHealth.MaxHealth:0}";
+            }
 
-        if (healthValueText != null)
-        {
-            healthValueText.text = $"{playerHealth.CurrentHealth:0} / {playerHealth.MaxHealth:0}";
-        }
-
-        if (armorValueText != null)
-        {
-            armorValueText.text = $"{playerHealth.CurrentArmor:0} / {playerHealth.MaxArmor:0}";
+            if (armorValueText != null)
+            {
+                armorValueText.text = $"{playerHealth.CurrentArmor:0} / {playerHealth.MaxArmor:0}";
+            }
         }
 
         if (ammoValueText != null && playerWeapon != null)
@@ -209,6 +206,24 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         {
             pointsValueText.text = enhancementPoints.CurrentPoints.ToString();
         }
+
+        UpdateAbilityStatus(dodgeStatusText, playerDodge != null && playerDodge.CanDodge,
+            playerDodge != null ? playerDodge.DodgeCooldownRemaining : 0f);
+        UpdateAbilityStatus(parryStatusText, playerParry != null && playerParry.CanParry,
+            playerParry != null ? playerParry.ParryCooldownRemaining : 0f);
+    }
+
+    private static void UpdateAbilityStatus(Text statusText, bool isReady, float cooldownRemaining)
+    {
+        if (statusText == null)
+        {
+            return;
+        }
+
+        statusText.text = isReady ? "1 / 1  READY" : $"0 / 1  {cooldownRemaining:0.0}s";
+        statusText.color = isReady
+            ? new Color(0.35f, 0.95f, 0.7f)
+            : new Color(1f, 0.65f, 0.3f);
     }
 
     private void OnDisable()
@@ -322,6 +337,30 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         pointsValueText = CreateLabel(resourcesPanel.transform, "PointsValue", string.Empty, fontSize,
             new Color(1f, 0.78f, 0.28f), Vector2.zero, Vector2.zero, new Vector2(174f, 36f),
             new Vector2(100f, 40f), TextAnchor.MiddleLeft);
+
+        GameObject abilitiesPanel = CreatePanel(
+            canvasObject.transform,
+            "AbilitiesPanel",
+            new Vector2(1f, 0f),
+            new Vector2(1f, 0f),
+            new Vector2(1f, 0f),
+            new Vector2(-screenOffset.x, screenOffset.y + 122f),
+            new Vector2(300f, 104f));
+        CreateLabel(abilitiesPanel.transform, "AbilitiesTitle", "COMBAT", 13,
+            new Color(0.62f, 0.72f, 0.84f), Vector2.zero, Vector2.zero, new Vector2(18f, 76f),
+            new Vector2(110f, 20f), TextAnchor.MiddleLeft);
+        CreateLabel(abilitiesPanel.transform, "DodgeLabel", "DASH", 14, textColor,
+            Vector2.zero, Vector2.zero, new Vector2(18f, 46f),
+            new Vector2(100f, 22f), TextAnchor.MiddleLeft);
+        dodgeStatusText = CreateLabel(abilitiesPanel.transform, "DodgeStatus", string.Empty, 16, textColor,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-18f, 46f),
+            new Vector2(150f, 22f), TextAnchor.MiddleRight);
+        CreateLabel(abilitiesPanel.transform, "ParryLabel", "PARRY", 14, textColor,
+            Vector2.zero, Vector2.zero, new Vector2(18f, 18f),
+            new Vector2(100f, 22f), TextAnchor.MiddleLeft);
+        parryStatusText = CreateLabel(abilitiesPanel.transform, "ParryStatus", string.Empty, 16, textColor,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-18f, 18f),
+            new Vector2(150f, 22f), TextAnchor.MiddleRight);
 
         feedbackText = CreateLabel(canvasObject.transform, "PlayerCombatFeedbackText", string.Empty,
             32, textColor, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
