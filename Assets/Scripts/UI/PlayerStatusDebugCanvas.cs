@@ -36,6 +36,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private GameObject criticalHealthPanel;
     private Image criticalHealthBackground;
     private Text criticalHealthText;
+    private GameObject defeatOverlay;
 
     private const float DamageFlashDuration = 0.38f;
 
@@ -121,6 +122,8 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         playerHealth.HealthChanged += OnHealthChanged;
         playerHealth.ArmorChanged += OnArmorChanged;
         playerHealth.DamageTaken += OnDamageTaken;
+        playerHealth.Died -= OnPlayerDied;
+        playerHealth.Died += OnPlayerDied;
     }
 
     private void OnHealthChanged(float currentHealth)
@@ -138,6 +141,19 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         ShowDamageFlash(damagedArmor
             ? new Color(1f, 0.55f, 0.16f, 1f)
             : new Color(1f, 0.16f, 0.2f, 1f));
+    }
+
+    private void OnPlayerDied()
+    {
+        if (criticalHealthPanel != null)
+        {
+            criticalHealthPanel.SetActive(false);
+        }
+
+        if (defeatOverlay != null)
+        {
+            defeatOverlay.SetActive(true);
+        }
     }
 
     private void ShowDamageFlash(Color color)
@@ -391,6 +407,7 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             playerHealth.HealthChanged -= OnHealthChanged;
             playerHealth.ArmorChanged -= OnArmorChanged;
             playerHealth.DamageTaken -= OnDamageTaken;
+            playerHealth.Died -= OnPlayerDied;
         }
 
         if (playerWeapon != null)
@@ -582,6 +599,41 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             new Vector2(0f, -screenOffset.y - 60f), new Vector2(600f, 60f),
             TextAnchor.UpperCenter);
         feedbackText.fontStyle = FontStyle.Bold;
+
+        defeatOverlay = CreatePanel(
+            canvasObject.transform,
+            "DefeatOverlay",
+            Vector2.zero,
+            Vector2.one,
+            new Vector2(0.5f, 0.5f),
+            Vector2.zero,
+            Vector2.zero);
+        Image defeatBackground = defeatOverlay.GetComponent<Image>();
+        defeatBackground.color = new Color(0.12f, 0.015f, 0.025f, 0.78f);
+        defeatBackground.raycastTarget = false;
+        CreateLabel(
+            defeatOverlay.transform,
+            "DefeatTitle",
+            "DEFEATED",
+            48,
+            new Color(1f, 0.42f, 0.46f),
+            new Vector2(0.5f, 0.5f),
+            new Vector2(0.5f, 0.5f),
+            new Vector2(0f, 12f),
+            new Vector2(600f, 72f),
+            TextAnchor.MiddleCenter).fontStyle = FontStyle.Bold;
+        CreateLabel(
+            defeatOverlay.transform,
+            "DefeatSubtitle",
+            "COMBAT ENDED",
+            18,
+            new Color(0.88f, 0.78f, 0.8f),
+            new Vector2(0.5f, 0.5f),
+            new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -42f),
+            new Vector2(400f, 36f),
+            TextAnchor.MiddleCenter);
+        defeatOverlay.SetActive(false);
     }
 
     private static GameObject CreatePanel(

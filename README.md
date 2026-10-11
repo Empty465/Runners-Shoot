@@ -86,6 +86,7 @@
 -   [x] Enemy Stun
 -   [x] Stun 중 Enemy 공격 방지
 -   [x] Stun 종료 후 Enemy 공격 재개
+-   [x] Player 사망 시 조작/전투 중단 및 패배 HUD
 
 현재 전투 프로토타입의 핵심 흐름:
 

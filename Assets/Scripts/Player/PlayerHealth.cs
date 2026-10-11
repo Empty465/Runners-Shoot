@@ -13,6 +13,7 @@ public class PlayerHealth : MonoBehaviour
     public event Action<float> HealthChanged;
     public event Action<float> ArmorChanged;
     public event Action<bool> DamageTaken;
+    public event Action Died;
     public float MaxHealth => maxHealth;
     public float CurrentHealth { get; private set; }
     public float MaxArmor => maxArmor;
@@ -51,6 +52,7 @@ public class PlayerHealth : MonoBehaviour
         if (IsDead)
         {
             Debug.Log("[Player] Defeated");
+            Died?.Invoke();
         }
     }
 
