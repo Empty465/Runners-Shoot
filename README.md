@@ -1,5 +1,8 @@
 # Runner's Shoot
 
+> **개발 규칙:** Unity MCP는 토큰 소모가 커서 필요할 때만 최소한으로 사용하고,
+> 사용하려는데 안 되면 반드시 사용자에게 알린다. 자세한 내용은 [AGENTS.md](AGENTS.md) 참고.
+
 ## 1. 프로젝트 개요
 
 **Runner's Shoot**는 Unity 6로 개발하는 **2D 플랫포머 슈팅 패링 액션
@@ -193,6 +196,19 @@ Play Mode 진입 시 Slag, Pawn, Archer, Baron이 Knight와 함께 생성되어 
 (Unity MCP Play Mode 검증: 5종 스폰/라벨, 이동·점프, 시작 위치에서 대기, 근접 시
 Knight 접근·공격 확인. Play Mode 시작 직후 조작이 비활성화되던 문제는
 `PlayerDeathHandler` 초기화 순서 수정으로 해결.)
+
+배치(x): Slag -14, Pawn -8.5, Knight 7, Archer 11, Baron 14.5. 테스트 카메라
+크기는 11이며 5개 라벨이 겹치지 않고 보인다. 디버그 키(`TestArenaDebugKeys`,
+TestArena 전용): F2 플레이어 HP/Armor 회복, F3 씬 재로드(적 초기화).
+(Play Mode 검증: 위치·라벨 가독성, F2/F3 동작 확인. 하네스 키 입력이 불안정해
+Update 직접 호출로 검증함.)
+
+패링 가능 여부는 적 종류별 설계값이다. Knight/Archer/Baron은 패링 가능, Slag/Pawn은
+패링 불가이며 TestArena 라벨에 `(PARRY OK)` / `(NO PARRY)`로 표시된다. Knight 근접
+공격과 패링 성공(공격 취소·경직·강화 포인트 +1)은 Play Mode에서 확인했다. Pawn 투사체는
+패링 불가라 맞았다. 패링 판정은 0.45초(이전 0.32초)이며 쿨다운 종료 0.15초 전 입력은 버퍼링된다.
+패링 가능 공격은 선딜 마지막 0.4초에 초록/흰색으로 점멸하고, 패링 불가 공격은 보라색 전조
+설계다(보라색은 아직 MCP로 확인 못 함). Knight 기준 타격 0.40초 전 패링 4회 성공·버퍼링은 코드 호출로 확인했다.
 
 ------------------------------------------------------------------------
 

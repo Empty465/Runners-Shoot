@@ -3,6 +3,22 @@
 이 파일은 Unity 프로젝트의 기능 추가 및 수정 내역을 기록한다.
 각 기능은 구현 범위, 변경 파일, 검증 결과, 다음 작업을 남긴다.
 
+## 2026-10-11 - 적 종류별 프리팹 (직접 배치)
+
+- 내용: `Assets/Prefabs/Enemies/Enemy_Slag|Pawn|Knight|Archer|Baron.prefab`(BasicEnemy 변형)을 추가했다. 씬에 끌어다 놓으면 해당 종류로 동작한다. 감지 범위는 인스펙터의 `detectionRange`(프리팹 기본 Knight/Baron 8, 나머지 10)로 조절한다.
+- 변경: `BasicEnemyController`의 TestArena 자동 스폰/감지범위 4.5 강제는 `Enemies` 아래 적이 1개(Knight)일 때만 적용된다. 직접 배치해 2개 이상이면 자동 스폰이 꺼지고 인스펙터 값이 유지된다.
+- 검증(Unity MCP): 재컴파일 성공, 5개 프리팹의 archetype 값 확인, Play Mode에서 Archer/Slag 프리팹을 `Enemies` 아래 인스턴스화해 종류와 감지 범위 10 유지 확인, 새 콘솔 에러 없음.
+- 수정(색/체력 없음): 원인은 기본 `BasicEnemy` 프리팹에 `EnemyHealth`/`EnemyDeath`/`EnemyStagger`/`EnemyStatusDebugDisplay`가 없고 씬 인스턴스에만 추가돼 있던 것. 이 4개를 기본 프리팹에 적용해 5개 변형이 상속하도록 했다. 재확인(Play Mode, Baron 프리팹 인스턴스화): 체력 5, 체력바·라벨(`TEST: BARON (PARRY OK)`) 생성, 색 (0.85,0.2,0.24) 적용.
+- 수정(배치하자마자 죽음): 씬에 직접 배치한 `Enemy_Knight`가 Play 시작 때 `EnemyDeath.dead=True`(체력은 5)로 확인됐다. 원인은 `EnemyDeath.OnEnable`이 `EnemyHealth.Awake`보다 먼저 실행되어 `CurrentHealth`가 0으로 읽히던 초기화 순서 문제. `EnemyHealth`가 처음 읽을 때 지연 초기화하도록 수정했다. 재확인(Play Mode): 직접 배치한 `Enemy_Knight`를 포함한 모든 적이 dead=False, 체력 정상.
+- 미검증: 각 프리팹을 직접 배치했을 때의 전투 동작, 직접 배치 시 자동 스폰이 꺼지는지.
+
+## 2026-10-11 - 패링 체감 개선
+
+- 내용: 패링 판정 시간과 입력 버퍼, 공격 전조 색상 단서를 추가했다.
+- 변경: `PlayerParry` 패링 지속 0.32→0.45초(TestArena 씬 값도 변경), 쿨다운 종료 0.15초 전 입력 버퍼(`inputBufferTime`); `EnemyAttack` 전조 색상(패링 불가=보라, 패링 가능=주황→빨강, 선딜 마지막 0.4초(`parryCueTime`)=초록/흰색 점멸).
+- 검증(Unity MCP, Play Mode, Knight): 전조 색상이 선딜 초반 주황, 마지막 0.4초 초록으로 바뀜을 확인. 타격 0.40초 전에 패링 시작 시 4회 연속 `[Parry] SUCCESS`와 공격 취소 확인. 쿨다운 0.10초 남은 시점의 입력이 버퍼링되어 0.10초 뒤 패링이 시작됨을 확인. 콘솔 에러 0.
+- 미검증: 실제 마우스 입력(하니스에서 전조/입력은 코드 호출로 시뮬레이션), 보라색 전조(Pawn/Slag), Archer/Baron 패링.
+
 ## 2026-10-11 - 적 테스트 아레나 확장
 
 - 내용: TestArena의 전투 공간을 확장하고 다섯 적 Archetype을 한 번에 테스트하도록 배치했다.
@@ -16,6 +32,8 @@
   - `Assets/Scripts/Enemies/BasicEnemyController.cs`
   - `Assets/Scripts/Enemies/EnemyStatusDebugDisplay.cs`
   - `Assets/Scripts/Player/PlayerDeathHandler.cs`
+  - `Assets/Scripts/Level/TestArenaDebugKeys.cs`
+  - `Assets/Scripts/Combat/EnemyAttack.cs`
   - `README.md`
 - 검증:
   - `dotnet build "Assembly-CSharp.csproj" --no-restore` 성공, 경고/오류 0건.
@@ -27,6 +45,9 @@
   - Console 에러 0건, 재컴파일 성공. 수정 후 플레이어 컴포넌트가 모두 enabled 상태임을 확인했다.
   - 스폰된 SLAG(-12)/PAWN(-8)/KNIGHT(7)/ARCHER(8)/BARON(12) 5종과 `TEST: 이름` 라벨, HUD(HP 5/5, Armor 5/5)를 게임 뷰 캡처로 확인했다. Knight(7)와 Archer(8)는 겹쳐 보인다.
   - 가상 키보드 입력으로 A 이동(x 1.59 → -3.98)과 Space 점프(y 1.42 → 2.20)를 확인했다. D 이동은 x 0 → 1.59로 확인했다.
+  - 아레나 개선(2026-10-11): 적 배치를 Slag -14 / Pawn -8.5 / Knight 7 / Archer 11 / Baron 14.5로 바꿔 Knight·Archer 겹침을 해소하고, 카메라 크기를 11로 올려 5개 라벨이 모두 보임을 게임 뷰 캡처로 확인했다. 신규 `Assets/Scripts/Level/TestArenaDebugKeys.cs`: F2 HP/Armor 회복(5/5 확인), F3 씬 재로드(적 5종 초기 위치 복원, 디버그 키 유지 확인). 키 입력은 하네스 한계로 Update 직접 호출로 검증했다.
+  - 패링 조사/수정(2026-10-11): Knight 공격에 맞춰 TryStartParry 호출 시 `[Parry] SUCCESS`(공격 취소, 경직, 강화 포인트 +1) 확인. Slag/Pawn은 설계상 `parryable=false`라 패링되지 않으며(Pawn 투사체 피격 확인), 이를 알 수 있도록 TestArena 라벨에 `(PARRY OK)/(NO PARRY)` 추가(`EnemyAttack.IsParryable`, `EnemyStatusDebugDisplay`). 실제 우클릭 입력 경로는 `Mouse.rightButton` 주입 후 Update 호출로 `IsParryActive=True` 확인. Archer/Baron 패링은 미검증.
+  - Player의 중복 PlayerHealth(씬 인스턴스 추가분, startingArmor 0)를 제거해 프리팹 하나만 남김(HP 5, 컴포넌트 1개 확인). TestArena를 Build Settings에 추가하고 사망 후 R 재시작 동작(씬 재로드, 컨트롤 복구) 확인.
   - 시작 시 즉사 없음. Pawn은 4.0 거리에서 제자리 사격(약 2.5초 간격, 투사체 1발 0.75). 플레이어가 4.5 밖에 있는 적은 이동하지 않았다.
   - Knight는 3.0~3.2 거리에서 7.0 → 5.3까지 접근해 약 1.8초 간격으로 1.25씩 피해를 줬고, 무방비 상태에서 약 7초 만에 사망했다. Archer는 8.0 → 8.3으로 후퇴했다.
 - 제한:

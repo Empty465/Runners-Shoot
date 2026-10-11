@@ -1088,11 +1088,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a3810eec42243d4cae56256c7805123, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatusDebugCanvas
   screenOffset: {x: 20, y: 20}
   fontSize: 24
   textColor: {r: 1, g: 1, b: 1, a: 1}
+  damageShakeDuration: 0.16
+  damageShakeStrength: 0.08
+  criticalHealthThreshold: 0.2
 --- !u!1 &553305261
 GameObject:
   m_ObjectHideFlags: 0
@@ -1393,29 +1396,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f244329ffe078645ad9617df2cb5621, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerParry
-  parryDuration: 0.32
+  parryDuration: 0.45
   parryCooldown: 1
+  inputBufferTime: 0.15
   enhancementPointsPerParry: 1
   parryHitbox: {fileID: 81808793}
   parryDebugVisual: {fileID: 1357723602}
   parrySuccessDebugVisual: {fileID: 987953146}
---- !u!114 &893030602
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 893030591}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e529be8f288ae34db781bff5f3302da, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 5
-  maxArmor: 5
-  startingArmor: 0
 --- !u!114 &893030604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1426,7 +1415,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0788b21adc10e2f488f6dd1285f978db, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
   projectileSpeed: 14
   projectileDamage: 1
@@ -1435,14 +1424,33 @@ MonoBehaviour:
   muzzleOffset: 0.6
   projectileSize: 0.16
   projectileColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  maxAmmo: 30
+  startingAmmo: 30
   shotgunProjectileSpeed: 16
   shotgunProjectileLifetime: 3
+  shotgunProjectileDamage: 0.55
+  shotgunFireCooldown: 0.8
+  shotgunPelletCount: 7
   shotgunSpreadDegrees: 26
+  shotgunMaxAmmo: 8
+  shotgunStartingAmmo: 8
+  railgunDamage: 4
+  railgunFireCooldown: 1.4
+  railgunRange: 20
+  railgunExplosionRadius: 1.5
+  railgunMaxAmmo: 4
+  railgunStartingAmmo: 4
   upgradeCost: 1
   damageUpgradeAmount: 0.5
   speedUpgradeAmount: 1.5
-  maxAmmo: 30
-  startingAmmo: 30
+  upgradeDuration: 10
+  burnDamagePerTick: 0.25
+  burnTickInterval: 0.5
+  burnTickCount: 4
+  armorOnBurnHit: 0.1
+  shotgunFollowupDelay: 0.12
+  railgunUpgradeDamageAmount: 0.5
+  railgunUpgradeRadiusAmount: 0.25
 --- !u!114 &893030605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1453,7 +1461,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e562896f6d366248a884afb4c213e00, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerExecution
   executionRange: 2
   healthThresholdRatio: 0.3
@@ -1477,7 +1485,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0bc15d0cdb569eb4ab0f95f9ee0f49bb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 5
 --- !u!114 &915831444
@@ -1490,7 +1498,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9524e6ee26047724aaf0b7ae784b3cd9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDeath
   deathPresentationDuration: 0.4
   deathFallAngle: 78
@@ -1506,9 +1514,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 537f0c38a1b6b0f408fc5b57ab9128e5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStagger
   staggerDuration: 0.25
+  damageHitsPerStagger: 1
 --- !u!114 &915831446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1519,13 +1528,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb8f3fe5ea1f96e4a905a965af0162c4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStatusDebugDisplay
   localOffset: {x: 0, y: 2.2, z: -0.3}
   fontSize: 32
   characterSize: 0.1
   staggerColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   stunColor: {r: 1, g: 0, b: 0, a: 1}
+  healthBarOffset: {x: 0, y: 1.55}
+  healthBarSize: {x: 1.4, y: 0.12}
+  healthColor: {r: 0.15, g: 0.9, b: 0.72, a: 1}
+  lowHealthColor: {r: 1, g: 0.24, b: 0.2, a: 1}
+  healthBarFrameColor: {r: 1, g: 0.63, b: 0.2, a: 1}
 --- !u!1 &951044576
 GameObject:
   m_ObjectHideFlags: 0
@@ -2296,7 +2310,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.Light2D
   m_ComponentVersion: 4
   m_LightType: 3
@@ -2963,7 +2977,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 9.5
+  orthographic size: 11
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -3749,7 +3763,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3604441095991625434, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 85033319dfe19444581310a9f5b81bfb, type: 2}
     - target: {fileID: 4446129199986616197, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: m_Name
@@ -3797,19 +3811,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5620552452577098689, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: playerTarget
-      value:
+      value: 
       objectReference: {fileID: 893030592}
     - target: {fileID: 6227916201784547595, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: playerTarget
-      value:
+      value: 
       objectReference: {fileID: 893030592}
     - target: {fileID: 6306576197162323087, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 85033319dfe19444581310a9f5b81bfb, type: 2}
     - target: {fileID: 6480876527942445029, guid: 79737706242d4f94db0584d974eb3910, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 85033319dfe19444581310a9f5b81bfb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3899,9 +3913,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1735070794060949732, guid: f0c491b711112cb4991c33efa4db9396, type: 3}
       insertIndex: -1
       addedObject: {fileID: 893030597}
-    - targetCorrespondingSourceObject: {fileID: 1735070794060949732, guid: f0c491b711112cb4991c33efa4db9396, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 893030602}
     - targetCorrespondingSourceObject: {fileID: 1735070794060949732, guid: f0c491b711112cb4991c33efa4db9396, type: 3}
       insertIndex: -1
       addedObject: {fileID: 893030604}

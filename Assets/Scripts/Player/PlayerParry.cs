@@ -7,8 +7,9 @@ using UnityEngine.InputSystem;
 public class PlayerParry : MonoBehaviour
 {
     [Header("Parry")]
-    [SerializeField] private float parryDuration = 0.32f;
+    [SerializeField] private float parryDuration = 0.45f;
     [SerializeField] private float parryCooldown = 1f;
+    [SerializeField, Min(0f)] private float inputBufferTime = 0.15f;
     [SerializeField] private int enhancementPointsPerParry = 1;
 
     [Header("Parry References")]
@@ -21,7 +22,7 @@ public class PlayerParry : MonoBehaviour
     private PlayerEnhancementPoints enhancementPoints;
     private PlayerCombatFeedbackVFX combatFeedbackVFX;
     private float nextParryTime;
-
+    private bool bufferedParry;
     public bool IsParryActive { get; private set; }
     public bool CanParry => parryRoutine == null && Time.time >= nextParryTime;
     public float ParryCooldownRemaining => Mathf.Max(0f, nextParryTime - Time.time);
@@ -70,7 +71,24 @@ public class PlayerParry : MonoBehaviour
     {
         if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
         {
+            if (CanParry)
+            {
+                TryStartParry();
+            }
+            else if (parryRoutine == null && ParryCooldownRemaining <= inputBufferTime)
+            {
+                bufferedParry = true;
+            }
+        }
+
+        if (bufferedParry && CanParry)
+        {
+            bufferedParry = false;
             TryStartParry();
+        }
+        else if (bufferedParry && ParryCooldownRemaining > inputBufferTime)
+        {
+            bufferedParry = false;
         }
     }
 

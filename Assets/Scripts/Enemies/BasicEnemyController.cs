@@ -74,25 +74,32 @@ public class BasicEnemyController : MonoBehaviour
     private void Start()
     {
         ApplyCombatProfile();
-        if (gameObject.scene.name == "TestArena")
+        if (gameObject.scene.name == "TestArena" && IsOnlyEnemyInGroup())
         {
             detectionRange = 4.5f;
             SpawnTestArenaArchetypes();
         }
     }
 
+    // Hand-placed enemies (more than one controller under the parent) keep their own inspector values.
+    private bool IsOnlyEnemyInGroup()
+    {
+        return archetype == EnemyArchetype.Knight && transform.parent != null &&
+               transform.parent.GetComponentsInChildren<BasicEnemyController>(true).Length == 1;
+    }
+
     private void SpawnTestArenaArchetypes()
     {
-        if (gameObject.scene.name != "TestArena" || archetype != EnemyArchetype.Knight ||
-            transform.parent == null || transform.parent.GetComponentsInChildren<BasicEnemyController>(true).Length != 1)
+        if (!IsOnlyEnemyInGroup())
         {
             return;
         }
 
-        SpawnTestEnemy(EnemyArchetype.Slag, -12f);
-        SpawnTestEnemy(EnemyArchetype.Pawn, -8f);
-        SpawnTestEnemy(EnemyArchetype.Archer, 8f);
-        SpawnTestEnemy(EnemyArchetype.Baron, 12f);
+        // Knight stays at its scene position (x=7); spacing keeps labels from overlapping.
+        SpawnTestEnemy(EnemyArchetype.Slag, -14f);
+        SpawnTestEnemy(EnemyArchetype.Pawn, -8.5f);
+        SpawnTestEnemy(EnemyArchetype.Archer, 11f);
+        SpawnTestEnemy(EnemyArchetype.Baron, 14.5f);
     }
 
     private void SpawnTestEnemy(EnemyArchetype testArchetype, float xPosition)

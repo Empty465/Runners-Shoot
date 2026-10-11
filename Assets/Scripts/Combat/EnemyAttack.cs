@@ -24,6 +24,7 @@ public class EnemyAttack : MonoBehaviour
     [Header("Attack Visuals")]
     [SerializeField] private Transform enemyVisual;
     [SerializeField] private float windupPulseSpeed = 14f;
+    [SerializeField] private float parryCueTime = 0.4f;
 
     private BasicEnemyController enemyController;
     private EnemyStun enemyStun;
@@ -46,6 +47,7 @@ public class EnemyAttack : MonoBehaviour
     public float AttackRange => attackRange;
     public bool IsBusy => attackRoutine != null;
     public bool IsWindupActive { get; private set; }
+    public bool IsParryable => parryable;
     public bool IsAttackActive => attackHitbox != null && attackHitbox.activeSelf;
 
     private void Awake()
@@ -300,8 +302,21 @@ public class EnemyAttack : MonoBehaviour
                 float progress = attackWindup > 0f
                     ? Mathf.Clamp01((Time.time - windupStartedAt) / attackWindup)
                     : 1f;
-                Color telegraphColor = Color.Lerp(new Color(1f, 0.58f, 0.14f), new Color(1f, 0.12f, 0.08f), progress);
+                Color telegraphColor;
+                if (!parryable)
+                {
+                    telegraphColor = Color.Lerp(new Color(0.72f, 0.35f, 1f), new Color(0.42f, 0.1f, 0.85f), progress);
+                }
+                else
+                {
+                    telegraphColor = Color.Lerp(new Color(1f, 0.58f, 0.14f), new Color(1f, 0.12f, 0.08f), progress);
+                }
+
                 telegraphColor = Color.Lerp(telegraphColor, Color.white, pulse * 0.28f);
+                if (parryable && attackWindup - (Time.time - windupStartedAt) <= parryCueTime)
+                {
+                    telegraphColor = Color.Lerp(new Color(0.3f, 1f, 0.55f), Color.white, pulse * 0.4f);
+                }
                 windupIndicatorRenderer.GetPropertyBlock(windupMaterialBlock);
                 windupMaterialBlock.SetColor("_White", telegraphColor);
                 windupIndicatorRenderer.SetPropertyBlock(windupMaterialBlock);

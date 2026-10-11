@@ -8,17 +8,41 @@ public class EnemyHealth : MonoBehaviour
 
     public event Action<float> HealthChanged;
     public float MaxHealth => maxHealth;
-    public float CurrentHealth { get; private set; }
+    public float CurrentHealth
+    {
+        get
+        {
+            EnsureInitialized();
+            return currentHealth;
+        }
+        private set => currentHealth = value;
+    }
     public bool IsDead => CurrentHealth <= 0f;
+
+    private float currentHealth;
+    private bool initialized;
+
+    // Other components' OnEnable can run before this Awake, so initialize lazily too.
+    private void EnsureInitialized()
+    {
+        if (initialized)
+        {
+            return;
+        }
+
+        initialized = true;
+        maxHealth = Mathf.Max(1f, maxHealth);
+        currentHealth = maxHealth;
+    }
 
     private void Awake()
     {
-        maxHealth = Mathf.Max(1f, maxHealth);
-        CurrentHealth = maxHealth;
+        EnsureInitialized();
     }
 
     public void ConfigureMaxHealth(float health)
     {
+        EnsureInitialized();
         if (IsDead)
         {
             return;

@@ -195,6 +195,10 @@ GameObject:
   - component: {fileID: 6569366654964728471}
   - component: {fileID: 4049918493400090382}
   - component: {fileID: 7197161680671696023}
+  - component: {fileID: 9005230196319942842}
+  - component: {fileID: 6148616256191531889}
+  - component: {fileID: 3907394024592307452}
+  - component: {fileID: 3945876994298622226}
   m_Layer: 0
   m_Name: BasicEnemy
   m_TagString: Untagged
@@ -283,6 +287,12 @@ MonoBehaviour:
   detectionRange: 8
   playerTarget: {fileID: 0}
   visual: {fileID: 1598886278478037869}
+  slagMoveSpeed: 1.6
+  pawnMoveSpeed: 2.2
+  knightMoveSpeed: 3.2
+  archerMoveSpeed: 2.4
+  baronMoveSpeed: 3.5
+  movementDeadZone: 0.08
 --- !u!114 &5620552452577098689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -300,12 +310,17 @@ MonoBehaviour:
   attackCooldown: 2.5
   attackWindup: 0.75
   attackActiveTime: 0.35
+  rangedAttack: 0
+  parryable: 1
+  projectileSpeed: 8
+  projectileColor: {r: 1, g: 1, b: 1, a: 1}
   playerTarget: {fileID: 0}
   attackHitbox: {fileID: 6583400202077177141}
   windupIndicator: {fileID: 1380307494299548493}
   hitboxHorizontalOffset: 1.3
   enemyVisual: {fileID: 0}
   windupPulseSpeed: 14
+  parryCueTime: 0.4
 --- !u!50 &6569366654964728471
 Rigidbody2D:
   serializedVersion: 5
@@ -358,10 +373,75 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d70fc883cd74e49837f4be3ea8caad0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHitFeedback
   hitColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.16
+--- !u!114 &9005230196319942842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4446129199986616197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc15d0cdb569eb4ab0f95f9ee0f49bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 5
+--- !u!114 &6148616256191531889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4446129199986616197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9524e6ee26047724aaf0b7ae784b3cd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeath
+  deathPresentationDuration: 0.4
+  deathFallAngle: 78
+  deathShrinkAmount: 0.82
+  deathDropDistance: 0.35
+--- !u!114 &3907394024592307452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4446129199986616197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 537f0c38a1b6b0f408fc5b57ab9128e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStagger
+  staggerDuration: 0.25
+  damageHitsPerStagger: 1
+--- !u!114 &3945876994298622226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4446129199986616197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb8f3fe5ea1f96e4a905a965af0162c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStatusDebugDisplay
+  localOffset: {x: 0, y: 2.2, z: -0.3}
+  fontSize: 32
+  characterSize: 0.1
+  staggerColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  stunColor: {r: 1, g: 0, b: 0, a: 1}
+  healthBarOffset: {x: 0, y: 1.55}
+  healthBarSize: {x: 1.4, y: 0.12}
+  healthColor: {r: 0.15, g: 0.9, b: 0.72, a: 1}
+  lowHealthColor: {r: 1, g: 0.24, b: 0.2, a: 1}
+  healthBarFrameColor: {r: 1, g: 0.63, b: 0.2, a: 1}
 --- !u!1 &5575759198285240617
 GameObject:
   m_ObjectHideFlags: 0

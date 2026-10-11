@@ -156,7 +156,9 @@ public class EnemyStatusDebugDisplay : MonoBehaviour
             return;
         }
 
-        archetypeText.text = $"TEST: {enemyController.Archetype.ToString().ToUpperInvariant()}";
+        EnemyAttack attack = enemyController.GetComponent<EnemyAttack>();
+        string parryTag = attack == null ? string.Empty : attack.IsParryable ? "\n(PARRY OK)" : "\n(NO PARRY)";
+        archetypeText.text = $"TEST: {enemyController.Archetype.ToString().ToUpperInvariant()}{parryTag}";
         archetypeText.color = enemyController.Archetype switch
         {
             EnemyArchetype.Slag => new Color(0.82f, 0.67f, 0.53f),
