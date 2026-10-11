@@ -306,7 +306,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttack
   attackRange: 4.5
-  attackDamage: 1
+  attackDamage: 20
   attackCooldown: 2.5
   attackWindup: 0.75
   attackActiveTime: 0.35
@@ -389,7 +389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bc15d0cdb569eb4ab0f95f9ee0f49bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 5
+  maxHealth: 100
 --- !u!114 &6148616256191531889
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,7 +4,7 @@ using UnityEngine;
 public class EnemyHealth : MonoBehaviour
 {
     [Header("Health")]
-    [SerializeField] private float maxHealth = 5f;
+    [SerializeField] private float maxHealth = 100f;
 
     public event Action<float> HealthChanged;
     public float MaxHealth => maxHealth;

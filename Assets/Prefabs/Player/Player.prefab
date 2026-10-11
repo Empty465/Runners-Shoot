@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1234567890123456781}
   - component: {fileID: 7054382190046812376}
   - component: {fileID: 7623904186501732941}
+  - component: {fileID: 9084761385584676012}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -122,7 +123,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_NotificationBehavior: 0
@@ -161,6 +162,21 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1234567890123456781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735070794060949732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e529be8f288ae34db781bff5f3302da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 100
+  maxArmor: 100
+  startingArmor: 100
 --- !u!114 &7054382190046812376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,21 +193,7 @@ MonoBehaviour:
   dodgeDuration: 0.18
   dodgeCooldown: 0.7
   defaultDirection: 1
---- !u!114 &1234567890123456781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1735070794060949732}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e529be8f288ae34db781bff5f3302da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 5
-  maxArmor: 5
-  startingArmor: 5
+  enhancementPointsPerDodge: 1
 --- !u!114 &7623904186501732941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,8 +204,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f71bc9168d64bd5a7029c0e8f47a1c3, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathHandler
+--- !u!114 &9084761385584676012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735070794060949732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f9963cb1da6564c99872ef0ae83470, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMelee
+  maxPoints: 100
+  passiveChargePerSecond: 4
+  parryCharge: 30
+  dodgeCharge: 20
+  normalPointCost: 25
+  normalRange: 1.8
+  normalHeight: 1.6
+  normalDamage: 30
+  normalCooldown: 0.4
+  normalAmmoReward: 2
+  holdTime: 0.4
+  heavyRange: 2.6
+  heavyHeight: 2
+  heavyDamage: 80
+  heavyStunRadius: 5
+  heavyCooldown: 0.8
 --- !u!1 &9129098555909756621
 GameObject:
   m_ObjectHideFlags: 0

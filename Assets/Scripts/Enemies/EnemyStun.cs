@@ -4,12 +4,12 @@ using UnityEngine;
 public class EnemyStun : MonoBehaviour
 {
     [SerializeField] private float stunDuration = 1.5f;
+    [SerializeField] private float lowHealthStunDuration = 3f;
     [SerializeField] private float healthThresholdRatio = 0.3f;
     [SerializeField] private GameObject stunDebugVisual;
 
     private EnemyHealth enemyHealth;
     private Coroutine stunRoutine;
-    private bool healthThresholdTriggered;
 
     public bool IsStunned { get; private set; }
     public float HealthThreshold => enemyHealth != null
@@ -44,26 +44,30 @@ public class EnemyStun : MonoBehaviour
 
     private void OnHealthChanged(float currentHealth)
     {
-        if (healthThresholdTriggered || enemyHealth == null || enemyHealth.IsDead)
+        if (enemyHealth == null || enemyHealth.IsDead || IsStunned)
         {
             return;
         }
 
         if (currentHealth <= HealthThreshold)
         {
-            healthThresholdTriggered = true;
             EnemyStagger enemyStagger = GetComponent<EnemyStagger>();
             if (enemyStagger != null)
             {
                 enemyStagger.CancelStagger();
             }
 
-            Stun();
+            Stun(lowHealthStunDuration);
             Debug.Log("[Enemy] Health Threshold Stun");
         }
     }
 
     public void Stun()
+    {
+        Stun(stunDuration);
+    }
+
+    public void Stun(float duration)
     {
         if (enemyHealth != null && enemyHealth.IsDead)
         {
@@ -75,16 +79,16 @@ public class EnemyStun : MonoBehaviour
             StopCoroutine(stunRoutine);
         }
 
-        stunRoutine = StartCoroutine(StunRoutine());
+        stunRoutine = StartCoroutine(StunRoutine(duration));
     }
 
-    private IEnumerator StunRoutine()
+    private IEnumerator StunRoutine(float duration)
     {
         IsStunned = true;
         SetStunVisual(true);
         Debug.Log("[Enemy] Stunned");
 
-        yield return new WaitForSeconds(stunDuration);
+        yield return new WaitForSeconds(duration);
 
         IsStunned = false;
         SetStunVisual(false);
@@ -114,7 +118,6 @@ public class EnemyStun : MonoBehaviour
         }
 
         IsStunned = false;
-        healthThresholdTriggered = false;
         SetStunVisual(false);
     }
 }

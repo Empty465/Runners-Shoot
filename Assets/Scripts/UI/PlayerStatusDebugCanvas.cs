@@ -25,6 +25,8 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private Text pointsValueText;
     private Text dodgeStatusText;
     private Text parryStatusText;
+    private Text meleeStatusText;
+    private PlayerMelee playerMelee;
     private Text feedbackText;
     private float feedbackUntil;
     private Image damageFlashOverlay;
@@ -385,6 +387,25 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             playerDodge != null ? playerDodge.DodgeCooldownRemaining : 0f);
         UpdateAbilityStatus(parryStatusText, playerParry != null && playerParry.CanParry,
             playerParry != null ? playerParry.ParryCooldownRemaining : 0f);
+
+        if (meleeStatusText != null)
+        {
+            if (playerMelee == null)
+            {
+                playerMelee = FindPlayerComponent<PlayerMelee>();
+            }
+
+            if (playerMelee != null)
+            {
+                bool full = playerMelee.IsFull;
+                meleeStatusText.text = full
+                    ? "HOLD  FULL"
+                    : $"{playerMelee.Points:0} / {playerMelee.MaxPoints:0}";
+                meleeStatusText.color = full
+                    ? new Color(1f, 0.55f, 0.25f)
+                    : new Color(0.5f, 0.9f, 1f);
+            }
+        }
     }
 
     private static void UpdateAbilityStatus(Text statusText, bool isReady, float cooldownRemaining)
@@ -577,20 +598,26 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
             new Vector2(1f, 0f),
             new Vector2(1f, 0f),
             new Vector2(-screenOffset.x, screenOffset.y + 122f),
-            new Vector2(300f, 104f));
+            new Vector2(300f, 132f));
         CreateLabel(abilitiesPanel.transform, "AbilitiesTitle", "COMBAT", 13,
-            new Color(0.62f, 0.72f, 0.84f), Vector2.zero, Vector2.zero, new Vector2(18f, 76f),
+            new Color(0.62f, 0.72f, 0.84f), Vector2.zero, Vector2.zero, new Vector2(18f, 104f),
             new Vector2(110f, 20f), TextAnchor.MiddleLeft);
         CreateLabel(abilitiesPanel.transform, "DodgeLabel", "DASH", 14, textColor,
-            Vector2.zero, Vector2.zero, new Vector2(18f, 46f),
+            Vector2.zero, Vector2.zero, new Vector2(18f, 74f),
             new Vector2(100f, 22f), TextAnchor.MiddleLeft);
         dodgeStatusText = CreateLabel(abilitiesPanel.transform, "DodgeStatus", string.Empty, 16, textColor,
-            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-18f, 46f),
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-18f, 74f),
             new Vector2(150f, 22f), TextAnchor.MiddleRight);
         CreateLabel(abilitiesPanel.transform, "ParryLabel", "PARRY", 14, textColor,
-            Vector2.zero, Vector2.zero, new Vector2(18f, 18f),
+            Vector2.zero, Vector2.zero, new Vector2(18f, 46f),
             new Vector2(100f, 22f), TextAnchor.MiddleLeft);
         parryStatusText = CreateLabel(abilitiesPanel.transform, "ParryStatus", string.Empty, 16, textColor,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-18f, 46f),
+            new Vector2(150f, 22f), TextAnchor.MiddleRight);
+        CreateLabel(abilitiesPanel.transform, "MeleeLabel", "MELEE (E)", 14, textColor,
+            Vector2.zero, Vector2.zero, new Vector2(18f, 18f),
+            new Vector2(100f, 22f), TextAnchor.MiddleLeft);
+        meleeStatusText = CreateLabel(abilitiesPanel.transform, "MeleeStatus", string.Empty, 16, textColor,
             new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-18f, 18f),
             new Vector2(150f, 22f), TextAnchor.MiddleRight);
 

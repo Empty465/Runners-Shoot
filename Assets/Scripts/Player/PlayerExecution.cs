@@ -1,7 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerInput))]
 public class PlayerExecution : MonoBehaviour
 {
     [Header("Execution")]
@@ -10,65 +8,44 @@ public class PlayerExecution : MonoBehaviour
     [SerializeField] private LayerMask targetLayers = ~0;
 
     [Header("Execution Rewards")]
-    [SerializeField] private float healthReward = 2f;
+    [SerializeField] private float healthReward = 40f;
     [SerializeField] private int ammoReward = 5;
 
-    private PlayerInput playerInput;
-    private InputAction interactAction;
     private PlayerHealth playerHealth;
     private PlayerWeapon playerWeapon;
 
     private void Awake()
     {
-        playerInput = GetComponent<PlayerInput>();
-        InputActionMap playerActions = playerInput.actions.FindActionMap("Player", true);
-        interactAction = playerActions.FindAction("Interact", true);
         playerHealth = GetComponent<PlayerHealth>();
         playerWeapon = GetComponent<PlayerWeapon>();
     }
 
-    private void OnEnable()
-    {
-        interactAction?.Enable();
-    }
-
-    private void OnDisable()
-    {
-        interactAction?.Disable();
-    }
-
-    private void Update()
-    {
-        if (interactAction != null && interactAction.WasPressedThisFrame())
-        {
-            TryExecute();
-        }
-    }
-
-    private void TryExecute()
+    // Called by PlayerMelee on an E tap; returns true when an enemy was executed.
+    public bool TryExecute()
     {
         EnemyHealth target = FindExecutionTarget();
         if (target == null)
         {
-            return;
+            return false;
         }
 
         EnemyStun enemyStun = target.GetComponent<EnemyStun>();
         if (enemyStun == null || !enemyStun.IsStunned)
         {
-            return;
+            return false;
         }
 
         float healthThreshold = target.MaxHealth * Mathf.Clamp01(healthThresholdRatio);
         if (target.CurrentHealth > healthThreshold)
         {
-            return;
+            return false;
         }
 
         target.TakeDamage(target.CurrentHealth);
         playerHealth?.RestoreHealth(healthReward);
         playerWeapon?.RestoreAmmo(ammoReward);
         Debug.Log("[PlayerExecution] EXECUTED");
+        return true;
     }
 
     private EnemyHealth FindExecutionTarget()

@@ -235,18 +235,18 @@ public class BasicEnemyController : MonoBehaviour
         switch (archetype)
         {
             case EnemyArchetype.Slag:
-                maxHealth = 3f;
+                maxHealth = 60f;
                 attackRange = 1.45f;
-                damage = 1f;
+                damage = 20f;
                 cooldown = 2.8f;
                 windup = 0.9f;
                 rangedAttack = false;
                 parryable = false;
                 break;
             case EnemyArchetype.Pawn:
-                maxHealth = 4f;
+                maxHealth = 80f;
                 attackRange = 7f;
-                damage = 0.75f;
+                damage = 15f;
                 cooldown = 2.5f;
                 windup = 0.85f;
                 rangedAttack = true;
@@ -255,18 +255,18 @@ public class BasicEnemyController : MonoBehaviour
                 projectileColor = new Color(0.35f, 0.78f, 1f);
                 break;
             case EnemyArchetype.Knight:
-                maxHealth = 5f;
+                maxHealth = 100f;
                 attackRange = 1.7f;
-                damage = 1.25f;
+                damage = 25f;
                 cooldown = 1.8f;
                 windup = 0.55f;
                 rangedAttack = false;
                 parryable = true;
                 break;
             case EnemyArchetype.Archer:
-                maxHealth = 4.5f;
+                maxHealth = 90f;
                 attackRange = 9f;
-                damage = 1f;
+                damage = 20f;
                 cooldown = 1.7f;
                 windup = 0.65f;
                 rangedAttack = true;
@@ -275,9 +275,9 @@ public class BasicEnemyController : MonoBehaviour
                 projectileColor = new Color(0.25f, 1f, 0.85f);
                 break;
             case EnemyArchetype.Baron:
-                maxHealth = 12f;
+                maxHealth = 240f;
                 attackRange = 10f;
-                damage = 1.6f;
+                damage = 32f;
                 cooldown = 1.6f;
                 windup = 0.45f;
                 rangedAttack = true;

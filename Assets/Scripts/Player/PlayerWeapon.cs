@@ -15,7 +15,7 @@ public class PlayerWeapon : MonoBehaviour
 {
     [Header("SMG")]
     [SerializeField] private float projectileSpeed = 14f;
-    [SerializeField] private float projectileDamage = 1f;
+    [SerializeField] private float projectileDamage = 20f;
     [SerializeField] private float projectileLifetime = 2f;
     [SerializeField] private float fireCooldown = 0.2f;
     [SerializeField] private float muzzleOffset = 0.6f;
@@ -27,7 +27,7 @@ public class PlayerWeapon : MonoBehaviour
     [Header("Shotgun")]
     [SerializeField] private float shotgunProjectileSpeed = 16f;
     [SerializeField] private float shotgunProjectileLifetime = 3f;
-    [SerializeField] private float shotgunProjectileDamage = 0.55f;
+    [SerializeField] private float shotgunProjectileDamage = 11f;
     [SerializeField] private float shotgunFireCooldown = 0.8f;
     [SerializeField] private int shotgunPelletCount = 7;
     [SerializeField] private float shotgunSpreadDegrees = 26f;
@@ -35,7 +35,7 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private int shotgunStartingAmmo = 8;
 
     [Header("Railgun")]
-    [SerializeField] private float railgunDamage = 4f;
+    [SerializeField] private float railgunDamage = 80f;
     [SerializeField] private float railgunFireCooldown = 1.4f;
     [SerializeField] private float railgunRange = 20f;
     [SerializeField] private float railgunExplosionRadius = 1.5f;
@@ -44,15 +44,15 @@ public class PlayerWeapon : MonoBehaviour
 
     [Header("Upgrade")]
     [SerializeField] private int upgradeCost = 1;
-    [SerializeField] private float damageUpgradeAmount = 0.5f;
+    [SerializeField] private float damageUpgradeAmount = 10f;
     [SerializeField] private float speedUpgradeAmount = 1.5f;
     [SerializeField] private float upgradeDuration = 10f;
-    [SerializeField] private float burnDamagePerTick = 0.25f;
+    [SerializeField] private float burnDamagePerTick = 5f;
     [SerializeField] private float burnTickInterval = 0.5f;
     [SerializeField] private int burnTickCount = 4;
-    [SerializeField] private float armorOnBurnHit = 0.1f;
+    [SerializeField] private float armorOnBurnHit = 2f;
     [SerializeField] private float shotgunFollowupDelay = 0.12f;
-    [SerializeField] private float railgunUpgradeDamageAmount = 0.5f;
+    [SerializeField] private float railgunUpgradeDamageAmount = 10f;
     [SerializeField] private float railgunUpgradeRadiusAmount = 0.25f;
 
     private PlayerInput playerInput;

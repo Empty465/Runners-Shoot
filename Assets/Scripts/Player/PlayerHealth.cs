@@ -4,10 +4,10 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health")]
-    [SerializeField] private float maxHealth = 5f;
+    [SerializeField] private float maxHealth = 100f;
 
     [Header("Armor")]
-    [SerializeField] private float maxArmor = 5f;
+    [SerializeField] private float maxArmor = 100f;
     [SerializeField] private float startingArmor;
 
     public event Action<float> HealthChanged;
