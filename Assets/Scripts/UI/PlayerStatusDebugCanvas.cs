@@ -12,17 +12,22 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     private PlayerEnhancementPoints enhancementPoints;
     private PlayerParry playerParry;
     private PlayerDodge playerDodge;
-    private Text statusText;
+    private Image healthFill;
+    private Image armorFill;
+    private Text healthValueText;
+    private Text armorValueText;
+    private Text ammoValueText;
+    private Text pointsValueText;
     private Text feedbackText;
     private float feedbackUntil;
 
     private void Awake()
     {
-        playerHealth = FindAnyObjectByType<PlayerHealth>();
-        playerWeapon = FindAnyObjectByType<PlayerWeapon>();
-        enhancementPoints = FindAnyObjectByType<PlayerEnhancementPoints>();
-        playerParry = FindAnyObjectByType<PlayerParry>();
-        playerDodge = FindAnyObjectByType<PlayerDodge>();
+        playerHealth = FindPlayerComponent<PlayerHealth>();
+        playerWeapon = FindPlayerComponent<PlayerWeapon>();
+        enhancementPoints = FindPlayerComponent<PlayerEnhancementPoints>();
+        playerParry = FindPlayerComponent<PlayerParry>();
+        playerDodge = FindPlayerComponent<PlayerDodge>();
         CreateStatusText();
         SubscribeToHealthChanges();
         SubscribeToAmmoChanges();
@@ -34,76 +39,42 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
     {
         if (playerHealth == null)
         {
-            playerHealth = FindAnyObjectByType<PlayerHealth>();
+            playerHealth = FindPlayerComponent<PlayerHealth>();
             SubscribeToHealthChanges();
         }
 
         if (playerWeapon == null)
         {
-            playerWeapon = FindAnyObjectByType<PlayerWeapon>();
+            playerWeapon = FindPlayerComponent<PlayerWeapon>();
             SubscribeToAmmoChanges();
         }
 
         if (enhancementPoints == null)
         {
-            enhancementPoints = FindAnyObjectByType<PlayerEnhancementPoints>();
+            enhancementPoints = FindPlayerComponent<PlayerEnhancementPoints>();
             SubscribeToEnhancementPointChanges();
         }
 
         if (playerParry == null)
         {
-            playerParry = FindAnyObjectByType<PlayerParry>();
+            playerParry = FindPlayerComponent<PlayerParry>();
             SubscribeToCombatFeedback();
         }
 
         if (playerDodge == null)
         {
-            playerDodge = FindAnyObjectByType<PlayerDodge>();
+            playerDodge = FindPlayerComponent<PlayerDodge>();
             SubscribeToCombatFeedback();
+        }
+
+        if (feedbackText != null && feedbackText.text.Length > 0 && Time.time >= feedbackUntil)
+        {
+            feedbackText.text = string.Empty;
         }
 
         if (playerHealth != null)
         {
             UpdateStatusText();
-        }
-    }
-
-    private void OnGUI()
-    {
-        if (playerHealth == null)
-        {
-            playerHealth = FindAnyObjectByType<PlayerHealth>();
-            SubscribeToHealthChanges();
-        }
-
-        if (playerWeapon == null)
-        {
-            playerWeapon = FindAnyObjectByType<PlayerWeapon>();
-            SubscribeToAmmoChanges();
-        }
-
-        if (enhancementPoints == null)
-        {
-            enhancementPoints = FindAnyObjectByType<PlayerEnhancementPoints>();
-            SubscribeToEnhancementPointChanges();
-        }
-
-        if (playerParry == null)
-        {
-            playerParry = FindAnyObjectByType<PlayerParry>();
-            SubscribeToCombatFeedback();
-        }
-
-        if (playerDodge == null)
-        {
-            playerDodge = FindAnyObjectByType<PlayerDodge>();
-            SubscribeToCombatFeedback();
-        }
-
-        UpdateStatusText();
-        if (feedbackText != null && Time.time >= feedbackUntil)
-        {
-            feedbackText.text = string.Empty;
         }
     }
 
@@ -194,22 +165,49 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
 
     private void UpdateStatusText()
     {
-        if (statusText == null || playerHealth == null)
+        if (playerHealth == null)
         {
             return;
         }
 
-        statusText.text = $"HP: {playerHealth.CurrentHealth:0}/{playerHealth.MaxHealth:0} | " +
-            $"ARMOR: {playerHealth.CurrentArmor:0}/{playerHealth.MaxArmor:0}";
+        float healthRatio = playerHealth.MaxHealth > 0f
+            ? Mathf.Clamp01(playerHealth.CurrentHealth / playerHealth.MaxHealth)
+            : 0f;
+        float armorRatio = playerHealth.MaxArmor > 0f
+            ? Mathf.Clamp01(playerHealth.CurrentArmor / playerHealth.MaxArmor)
+            : 0f;
 
-        if (playerWeapon != null)
+        if (healthFill != null)
         {
-            statusText.text += $" | AMMO: {playerWeapon.CurrentAmmo}/{playerWeapon.MaxAmmo}";
+            SetFillAmount(healthFill, healthRatio);
         }
 
-        if (enhancementPoints != null)
+        if (armorFill != null)
         {
-            statusText.text += $" | POINTS: {enhancementPoints.CurrentPoints}/{enhancementPoints.MaxPoints}";
+            SetFillAmount(armorFill, armorRatio);
+        }
+
+        if (healthValueText != null)
+        {
+            healthValueText.text = $"{playerHealth.CurrentHealth:0} / {playerHealth.MaxHealth:0}";
+        }
+
+        if (armorValueText != null)
+        {
+            armorValueText.text = $"{playerHealth.CurrentArmor:0} / {playerHealth.MaxArmor:0}";
+        }
+
+        if (ammoValueText != null && playerWeapon != null)
+        {
+            ammoValueText.text = $"{playerWeapon.CurrentAmmo:00} / {playerWeapon.MaxAmmo:00}";
+            ammoValueText.color = playerWeapon.CurrentAmmo <= 5
+                ? new Color(1f, 0.35f, 0.32f)
+                : textColor;
+        }
+
+        if (pointsValueText != null && enhancementPoints != null)
+        {
+            pointsValueText.text = enhancementPoints.CurrentPoints.ToString();
         }
     }
 
@@ -244,6 +242,21 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         }
     }
 
+    private static T FindPlayerComponent<T>() where T : Component
+    {
+        GameObject player = GameObject.Find("Player");
+        if (player != null)
+        {
+            T component = player.GetComponent<T>();
+            if (component != null)
+            {
+                return component;
+            }
+        }
+
+        return FindAnyObjectByType<T>();
+    }
+
     private void CreateStatusText()
     {
         GameObject canvasObject = new GameObject("PlayerStatusDebugCanvas");
@@ -252,44 +265,164 @@ public class PlayerStatusDebugCanvas : MonoBehaviour
         Canvas canvas = canvasObject.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 100;
-        canvasObject.AddComponent<CanvasScaler>();
-        canvasObject.AddComponent<GraphicRaycaster>();
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1280f, 720f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
 
-        GameObject textObject = new GameObject("PlayerStatusDebugText");
-        textObject.transform.SetParent(canvasObject.transform, false);
+        GameObject vitalsPanel = CreatePanel(
+            canvasObject.transform,
+            "VitalsPanel",
+            new Vector2(0f, 0f),
+            new Vector2(0f, 0f),
+            new Vector2(0f, 0f),
+            new Vector2(screenOffset.x, screenOffset.y),
+            new Vector2(318f, 138f));
+        CreateLabel(vitalsPanel.transform, "VitalsTitle", "VITALS", 13, new Color(0.62f, 0.72f, 0.84f),
+            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(16f, -11f),
+            new Vector2(120f, 20f), TextAnchor.UpperLeft);
+        CreateLabel(vitalsPanel.transform, "HealthLabel", "HEALTH", 13, textColor,
+            Vector2.zero, Vector2.zero, new Vector2(16f, 91f),
+            new Vector2(100f, 19f), TextAnchor.MiddleLeft);
+        healthValueText = CreateLabel(vitalsPanel.transform, "HealthValue", string.Empty, 14, textColor,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-16f, 91f),
+            new Vector2(100f, 19f), TextAnchor.MiddleRight);
+        healthFill = CreateBar(vitalsPanel.transform, "HealthBar", new Color(1f, 0.31f, 0.36f),
+            new Vector2(16f, 75f), new Vector2(286f, 8f));
 
-        statusText = textObject.AddComponent<Text>();
-        statusText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        statusText.fontSize = fontSize;
-        statusText.color = textColor;
-        statusText.alignment = TextAnchor.UpperLeft;
-        statusText.horizontalOverflow = HorizontalWrapMode.Overflow;
-        statusText.verticalOverflow = VerticalWrapMode.Overflow;
+        CreateLabel(vitalsPanel.transform, "ArmorLabel", "ARMOR", 13, textColor,
+            Vector2.zero, Vector2.zero, new Vector2(16f, 44f),
+            new Vector2(100f, 19f), TextAnchor.MiddleLeft);
+        armorValueText = CreateLabel(vitalsPanel.transform, "ArmorValue", string.Empty, 14, textColor,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-16f, 44f),
+            new Vector2(100f, 19f), TextAnchor.MiddleRight);
+        armorFill = CreateBar(vitalsPanel.transform, "ArmorBar", new Color(0.16f, 0.73f, 1f),
+            new Vector2(16f, 28f), new Vector2(286f, 8f));
 
-        RectTransform textTransform = statusText.rectTransform;
-        textTransform.anchorMin = new Vector2(0f, 1f);
-        textTransform.anchorMax = new Vector2(0f, 1f);
-        textTransform.pivot = new Vector2(0f, 1f);
-        textTransform.anchoredPosition = new Vector2(screenOffset.x, -screenOffset.y);
-        textTransform.sizeDelta = new Vector2(420f, 80f);
+        GameObject resourcesPanel = CreatePanel(
+            canvasObject.transform,
+            "ResourcesPanel",
+            new Vector2(1f, 0f),
+            new Vector2(1f, 0f),
+            new Vector2(1f, 0f),
+            new Vector2(-screenOffset.x, screenOffset.y),
+            new Vector2(300f, 112f));
+        CreateLabel(resourcesPanel.transform, "AmmoTitle", "AMMO", 13, new Color(0.62f, 0.72f, 0.84f),
+            Vector2.zero, Vector2.zero, new Vector2(18f, 80f),
+            new Vector2(110f, 20f), TextAnchor.MiddleLeft);
+        ammoValueText = CreateLabel(resourcesPanel.transform, "AmmoValue", string.Empty, fontSize, textColor,
+            Vector2.zero, Vector2.zero, new Vector2(18f, 36f),
+            new Vector2(130f, 40f), TextAnchor.MiddleLeft);
+        CreateImage(resourcesPanel.transform, "Divider", new Color(0.36f, 0.43f, 0.53f, 0.8f),
+            Vector2.zero, Vector2.zero, new Vector2(154f, 17f), new Vector2(1f, 76f));
+        CreateLabel(resourcesPanel.transform, "PointsTitle", "POINTS", 13, new Color(0.62f, 0.72f, 0.84f),
+            Vector2.zero, Vector2.zero, new Vector2(174f, 80f),
+            new Vector2(110f, 20f), TextAnchor.MiddleLeft);
+        pointsValueText = CreateLabel(resourcesPanel.transform, "PointsValue", string.Empty, fontSize,
+            new Color(1f, 0.78f, 0.28f), Vector2.zero, Vector2.zero, new Vector2(174f, 36f),
+            new Vector2(100f, 40f), TextAnchor.MiddleLeft);
 
-        GameObject feedbackObject = new GameObject("PlayerCombatFeedbackText");
-        feedbackObject.transform.SetParent(canvasObject.transform, false);
-
-        feedbackText = feedbackObject.AddComponent<Text>();
-        feedbackText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        feedbackText.fontSize = 32;
+        feedbackText = CreateLabel(canvasObject.transform, "PlayerCombatFeedbackText", string.Empty,
+            32, textColor, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -screenOffset.y - 60f), new Vector2(600f, 60f),
+            TextAnchor.UpperCenter);
         feedbackText.fontStyle = FontStyle.Bold;
-        feedbackText.alignment = TextAnchor.UpperCenter;
-        feedbackText.horizontalOverflow = HorizontalWrapMode.Overflow;
-        feedbackText.verticalOverflow = VerticalWrapMode.Overflow;
-        feedbackText.text = string.Empty;
+    }
 
-        RectTransform feedbackTransform = feedbackText.rectTransform;
-        feedbackTransform.anchorMin = new Vector2(0.5f, 1f);
-        feedbackTransform.anchorMax = new Vector2(0.5f, 1f);
-        feedbackTransform.pivot = new Vector2(0.5f, 1f);
-        feedbackTransform.anchoredPosition = new Vector2(0f, -screenOffset.y - 60f);
-        feedbackTransform.sizeDelta = new Vector2(600f, 60f);
+    private static GameObject CreatePanel(
+        Transform parent,
+        string objectName,
+        Vector2 anchorMin,
+        Vector2 anchorMax,
+        Vector2 pivot,
+        Vector2 anchoredPosition,
+        Vector2 size)
+    {
+        GameObject panel = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        panel.transform.SetParent(parent, false);
+        RectTransform rectTransform = panel.GetComponent<RectTransform>();
+        rectTransform.anchorMin = anchorMin;
+        rectTransform.anchorMax = anchorMax;
+        rectTransform.pivot = pivot;
+        rectTransform.anchoredPosition = anchoredPosition;
+        rectTransform.sizeDelta = size;
+        panel.GetComponent<Image>().color = new Color(0.035f, 0.055f, 0.09f, 0.9f);
+        return panel;
+    }
+
+    private static Text CreateLabel(
+        Transform parent,
+        string objectName,
+        string initialText,
+        int size,
+        Color color,
+        Vector2 anchorMin,
+        Vector2 anchorMax,
+        Vector2 anchoredPosition,
+        Vector2 dimensions,
+        TextAnchor alignment)
+    {
+        GameObject textObject = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+        textObject.transform.SetParent(parent, false);
+
+        Text label = textObject.GetComponent<Text>();
+        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.fontSize = size;
+        label.color = color;
+        label.alignment = alignment;
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.verticalOverflow = VerticalWrapMode.Overflow;
+        label.text = initialText;
+
+        RectTransform rectTransform = label.rectTransform;
+        rectTransform.anchorMin = anchorMin;
+        rectTransform.anchorMax = anchorMax;
+        rectTransform.pivot = alignment == TextAnchor.UpperCenter
+            ? new Vector2(0.5f, 1f)
+            : new Vector2(anchorMin.x, anchorMin.y);
+        rectTransform.anchoredPosition = anchoredPosition;
+        rectTransform.sizeDelta = dimensions;
+        return label;
+    }
+
+    private static Image CreateImage(
+        Transform parent,
+        string objectName,
+        Color color,
+        Vector2 anchorMin,
+        Vector2 anchorMax,
+        Vector2 anchoredPosition,
+        Vector2 size)
+    {
+        GameObject imageObject = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        imageObject.transform.SetParent(parent, false);
+
+        RectTransform rectTransform = imageObject.GetComponent<RectTransform>();
+        rectTransform.anchorMin = anchorMin;
+        rectTransform.anchorMax = anchorMax;
+        rectTransform.pivot = new Vector2(0f, 0f);
+        rectTransform.anchoredPosition = anchoredPosition;
+        rectTransform.sizeDelta = size;
+        Image image = imageObject.GetComponent<Image>();
+        image.color = color;
+        return image;
+    }
+
+    private static Image CreateBar(Transform parent, string objectName, Color fillColor, Vector2 position, Vector2 size)
+    {
+        Image background = CreateImage(parent, objectName + "Background",
+            new Color(0.12f, 0.16f, 0.22f, 1f), Vector2.zero, Vector2.zero, position, size);
+        Image fill = CreateImage(background.transform, objectName + "Fill", fillColor,
+            Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        return fill;
+    }
+
+    private static void SetFillAmount(Image fill, float amount)
+    {
+        RectTransform rectTransform = fill.rectTransform;
+        rectTransform.anchorMax = new Vector2(amount, 1f);
+        rectTransform.offsetMin = Vector2.zero;
+        rectTransform.offsetMax = Vector2.zero;
     }
 }
