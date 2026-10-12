@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum MeleeAttackKind
+{
+    Normal,
+    Heavy,
+    Execute
+}
+
 // E tap: execute a stunned low-health enemy, otherwise a normal melee hit.
 // E hold with full melee points: heavy melee with an area stun.
 public class PlayerMelee : MonoBehaviour
@@ -43,6 +50,8 @@ public class PlayerMelee : MonoBehaviour
     private int facingDirection = 1;
 
     public event Action<float> PointsChanged;
+    public event Action<MeleeAttackKind> AttackPerformed;
+    public int FacingDirection => facingDirection;
     public float Points => points;
     public float MaxPoints => maxPoints;
     public bool IsFull => points >= maxPoints;
@@ -157,6 +166,7 @@ public class PlayerMelee : MonoBehaviour
         {
             nextAttackTime = Time.time + normalCooldown;
             ShowSlash(normalRange, normalHeight, new Color(1f, 0.85f, 0.3f, 0.7f));
+            AttackPerformed?.Invoke(MeleeAttackKind.Execute);
             return;
         }
 
@@ -173,6 +183,7 @@ public class PlayerMelee : MonoBehaviour
 
         nextAttackTime = Time.time + normalCooldown;
         ShowSlash(normalRange, normalHeight, new Color(0.5f, 0.9f, 1f, 0.7f));
+        AttackPerformed?.Invoke(MeleeAttackKind.Normal);
 
         List<EnemyHealth> hits = FindTargets(normalRange, normalHeight);
         if (hits.Count == 0)
@@ -201,6 +212,7 @@ public class PlayerMelee : MonoBehaviour
 
         nextAttackTime = Time.time + heavyCooldown;
         ShowSlash(heavyRange, heavyHeight, new Color(1f, 0.45f, 0.2f, 0.8f));
+        AttackPerformed?.Invoke(MeleeAttackKind.Heavy);
 
         List<EnemyHealth> hits = FindTargets(heavyRange, heavyHeight);
         if (hits.Count == 0)

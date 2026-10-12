@@ -78,6 +78,7 @@ public class PlayerWeapon : MonoBehaviour
     private Vector2 shotgunFollowupDirection;
 
     public event Action<int> AmmoChanged;
+    public event Action Fired;
     public event Action<PlayerWeaponType> WeaponChanged;
     public event Action<PlayerWeaponType, int> WeaponUpgradeChanged;
     public PlayerWeaponType CurrentWeapon { get; private set; }
@@ -236,6 +237,7 @@ public class PlayerWeapon : MonoBehaviour
         }
 
         Debug.Log($"[PlayerWeapon] Fired {CurrentWeaponName}");
+        Fired?.Invoke();
         return true;
     }
 

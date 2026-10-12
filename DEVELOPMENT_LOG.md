@@ -3,6 +3,19 @@
 이 파일은 Unity 프로젝트의 기능 추가 및 수정 내역을 기록한다.
 각 기능은 구현 범위, 변경 파일, 검증 결과, 다음 작업을 남긴다.
 
+## 2026-10-12 - TestArena 플레이어 테스트 큐브 제거
+
+- 내용: `TestArena`의 플레이어를 표시하던 `PlayerDebugVisual` 큐브와 패링 시작/성공 시 표시되는 `ParryDebugVisual`, `ParrySuccessDebugVisual` 큐브를 제거했다.
+- 보존: 플레이어 `BoxCollider2D`(0.8×1.8)와 패링 판정용 `ParryHitbox`(트리거 2.6×2.2)는 유지했다.
+- 검증(Unity MCP): 씬 계층에서 세 테스트 오브젝트가 제거됐고 두 콜라이더가 남아 있음을 확인한 뒤 TestArena를 저장했다. Play Mode 동작은 확인하지 않음.
+
+## 2026-10-12 - 플레이어 스프라이트 (제미나이 시트 → 프레임 분리)
+
+- 내용: 마젠타 배경 시트를 투명화하고 프레임 43장(셀 190×128, 발 위치 바닥 기준·몸통 중심 정렬)으로 분리해 `Assets/Art/Player/Frames/<동작>_NN.png`에 저장했다. 동작: idle 4, jump 3, run 6, dash 3, shoot 2, parry 3, slash 4, charge 2, heavy 4, execute 5, hit 2, death 5.
+- 코드: `PlayerSpriteAnimator`(상태 기반 프레임 재생, Animator 컨트롤러 없음, `Visual` 자식 SpriteRenderer를 런타임 생성, 마우스 방향으로 좌우 반전), `Assets/Editor/PlayerSpriteSetup.cs`(메뉴 `Tools/Player/Setup Sprites`: 스프라이트 임포트(PPU 66, Point, 피벗 하단 중앙) 후 `Player.prefab`에 연결). 이벤트 추가: `PlayerWeapon.Fired`, `PlayerMelee.AttackPerformed`/`FacingDirection`, `PlayerController.IsGrounded()` 공개. `PlayerDeathHandler`는 사망 시에도 애니메이터를 끄지 않도록 예외 처리.
+- 확인: 사용자가 Unity에서 스프라이트가 잘 작동하는 것 같다고 보고했다. 이 세션에서는 Play Mode 동작을 직접 재검증하지 않았다.
+- 프레임 배정은 추정이다: 원본 시트에 라벨이 없어 slash/charge/heavy/execute 배정이 틀릴 수 있다(원본에 3프레임 여유가 있어 미사용: 소드 자세 1장, 주먹 1장, 번개 이펙트 1장).
+
 ## 2026-10-11 - 체력/피해 수치 100 기준 스케일링
 
 - 내용: 모든 체력·피해 수치를 기존 대비 ×20으로 바꿔 플레이어 최대 체력을 100으로 맞췄다(기존 5).

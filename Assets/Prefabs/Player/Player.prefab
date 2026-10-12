@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 7054382190046812376}
   - component: {fileID: 7623904186501732941}
   - component: {fileID: 9084761385584676012}
+  - component: {fileID: 8180535354734990819}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -234,6 +235,113 @@ MonoBehaviour:
   heavyDamage: 80
   heavyStunRadius: 5
   heavyCooldown: 0.8
+--- !u!114 &8180535354734990819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735070794060949732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0759285395491914d9626bf8bb7c0ec7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpriteAnimator
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 21300000, guid: ef771735dc302494bb590d8606759e20, type: 3}
+    - {fileID: 21300000, guid: a994465432937274cbf41752fc6105c0, type: 3}
+    - {fileID: 21300000, guid: 8dcf92120d5eb104c9d4ba6ede598f7d, type: 3}
+    - {fileID: 21300000, guid: 172a094c4421fab488cf5961d1a04b13, type: 3}
+    fps: 6
+    loop: 1
+  - name: run
+    frames:
+    - {fileID: 21300000, guid: 1da1075e4019c6b49b5ea6b3b7147fdb, type: 3}
+    - {fileID: 21300000, guid: 1c6b9729aee4afc488c98f0a51637973, type: 3}
+    - {fileID: 21300000, guid: c3665c4fe535a3a4289da41df65cfdc7, type: 3}
+    - {fileID: 21300000, guid: f1177840f17f46a4389969cca0b01adf, type: 3}
+    - {fileID: 21300000, guid: fa5174b263a36c445a103e450a5312b5, type: 3}
+    - {fileID: 21300000, guid: b4a10d16d0fff964c8c35db56a39297b, type: 3}
+    fps: 12
+    loop: 1
+  - name: jump
+    frames:
+    - {fileID: 21300000, guid: 7281c8422566c6443a584f0bebb5f7f8, type: 3}
+    - {fileID: 21300000, guid: 35f10f2693e358d49a2006eb2a312366, type: 3}
+    - {fileID: 21300000, guid: fdd4637da8394634c9396bb68f9984cb, type: 3}
+    fps: 1
+    loop: 0
+  - name: dash
+    frames:
+    - {fileID: 21300000, guid: 08748f006c154964781de4d2d1e3fea7, type: 3}
+    - {fileID: 21300000, guid: b773ab8aa5f33bf49b4a99959db6a92c, type: 3}
+    - {fileID: 21300000, guid: 9b4c84cc3f8f70648b9bc365d69548d6, type: 3}
+    fps: 12
+    loop: 0
+  - name: shoot
+    frames:
+    - {fileID: 21300000, guid: 5edd6db4292d10c4bbd3e0baa67d755a, type: 3}
+    - {fileID: 21300000, guid: c464deb9eae76d740b5c16996df8cf07, type: 3}
+    fps: 8
+    loop: 0
+  - name: parry
+    frames:
+    - {fileID: 21300000, guid: dc96602d7d7ce2d4e87bdcfac5569c82, type: 3}
+    - {fileID: 21300000, guid: 8e5e8a54ec09fa14b919fda4f85fdcc7, type: 3}
+    - {fileID: 21300000, guid: 981a98468806a0f49a48961b3b5fb650, type: 3}
+    fps: 12
+    loop: 0
+  - name: slash
+    frames:
+    - {fileID: 21300000, guid: 6b158bc6b201d844d856da26dfbba753, type: 3}
+    - {fileID: 21300000, guid: f5b44dd13adedd34cbcfaf1ce6274e4e, type: 3}
+    - {fileID: 21300000, guid: 9cf98a6113942a747b6386abef5dd23a, type: 3}
+    - {fileID: 21300000, guid: ca75dcbb03fb3b94189a03e4d38baac1, type: 3}
+    fps: 16
+    loop: 0
+  - name: charge
+    frames:
+    - {fileID: 21300000, guid: 0a37ef67e43e02e44a5bbb17090f3167, type: 3}
+    - {fileID: 21300000, guid: ee2a4bfea9e37104c8dd7d084a67be13, type: 3}
+    fps: 6
+    loop: 0
+  - name: heavy
+    frames:
+    - {fileID: 21300000, guid: cdf810cfac4da674987420599d690000, type: 3}
+    - {fileID: 21300000, guid: 675769d62da5b314db5eaf034b87f565, type: 3}
+    - {fileID: 21300000, guid: 1115d24c30cbb864391b2770fd522b2a, type: 3}
+    - {fileID: 21300000, guid: e98fd01c9f9ca9947a66530a40b60192, type: 3}
+    fps: 12
+    loop: 0
+  - name: execute
+    frames:
+    - {fileID: 21300000, guid: 6d59176545c884c4bbc1eff9d5ed85a4, type: 3}
+    - {fileID: 21300000, guid: 820fa9b0919edde42b0d97f7f8fa3805, type: 3}
+    - {fileID: 21300000, guid: 4d2e676cc42aa814b89180895cbc4a95, type: 3}
+    - {fileID: 21300000, guid: 670086a9a5331324c9bd8e4ce91c60df, type: 3}
+    - {fileID: 21300000, guid: 2d25a3b3a3f5d9346997e89b045eeeff, type: 3}
+    fps: 12
+    loop: 0
+  - name: hit
+    frames:
+    - {fileID: 21300000, guid: bbbaed18fd85afb4f8c50d31e28df0a7, type: 3}
+    - {fileID: 21300000, guid: d2805ef52f217bf49ad68484ac726f47, type: 3}
+    fps: 8
+    loop: 0
+  - name: death
+    frames:
+    - {fileID: 21300000, guid: 996fde575afd25941a6d7c9eebff4044, type: 3}
+    - {fileID: 21300000, guid: 7f20b40228004b24ea163885ed32fe9f, type: 3}
+    - {fileID: 21300000, guid: aa3bfcd9c3e8f3a4f8c90418a78eb078, type: 3}
+    - {fileID: 21300000, guid: 7a987d09c0fa15b44b9329817670d6c7, type: 3}
+    - {fileID: 21300000, guid: 7746382686e6e1a41b48791ccc195283, type: 3}
+    fps: 8
+    loop: 0
+  sortingOrder: 20
+  hitDuration: 0.25
+  shootPoseDuration: 0.25
 --- !u!1 &9129098555909756621
 GameObject:
   m_ObjectHideFlags: 0

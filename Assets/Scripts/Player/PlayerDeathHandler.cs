@@ -86,7 +86,7 @@ public class PlayerDeathHandler : MonoBehaviour
 
         foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
         {
-            if (behaviour != this && behaviour != playerHealth)
+            if (behaviour != this && behaviour != playerHealth && !(behaviour is PlayerSpriteAnimator))
             {
                 behaviour.enabled = false;
             }
